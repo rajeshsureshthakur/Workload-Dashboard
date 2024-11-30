@@ -25,38 +25,41 @@ export class BaseTab {
         throw new Error('createTabContent must be implemented by child class');
     }
 
-   async load() {
-        try {
-            console.log(`Loading ${this.tabId} tab`);
-            
-            // Get or create the tab container
-            let tabContainer = document.getElementById(`${this.tabId}Tab`);
-            if (!tabContainer) {
-                console.log(`Creating container for ${this.tabId}`);
-                const mainContent = document.getElementById('mainContent');
-                if (!mainContent) {
-                    throw new Error('Main content container not found');
-                }
-
-                tabContainer = document.createElement('div');
-                tabContainer.id = `${this.tabId}Tab`;
-                tabContainer.className = 'tab-content hidden';
-                tabContainer.innerHTML = this.createTabContent();
-                mainContent.appendChild(tabContainer);
+   // BaseTab.js
+async load() {
+    try {
+        console.log(`Loading ${this.tabId} tab`);
+        
+        // Get or create the tab container
+        let tabContainer = document.getElementById(`${this.tabId}Tab`);
+        if (!tabContainer) {
+            console.log(`Creating container for ${this.tabId}`);
+            const mainContent = document.getElementById('mainContent');
+            if (!mainContent) {
+                throw new Error('Main content container not found');
             }
 
-            // Initialize components
-            await this.initializeComponents();
-            
-            // Load and update data
-            const data = await this.dashboardManager.dataStore.getCurrentData();
-            this.updateContent(data);
-
-        } catch (error) {
-            console.error(`Error loading ${this.tabId} tab:`, error);
-            throw error;
+            tabContainer = document.createElement('div');
+            tabContainer.id = `${this.tabId}Tab`;
+            tabContainer.className = 'tab-content hidden';
+            mainContent.appendChild(tabContainer);
         }
+
+        // Set the content
+        tabContainer.innerHTML = this.createTabContent();
+
+        // Initialize components after content is set
+        await this.initializeComponents();
+        
+        // Load and update data
+        const data = await this.dashboardManager.dataStore.getCurrentData();
+        this.updateContent(data);
+
+    } catch (error) {
+        console.error(`Error loading ${this.tabId} tab:`, error);
+        throw error;
     }
+}
 
 
     updateContent(data) {
