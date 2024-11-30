@@ -78,15 +78,14 @@ export class DashboardManager {
         }
     }
 
-    async switchTab(tabName) {
+    // DashboardManager.js method correction
+async switchTab(tabName) {
     console.log('Switching to tab:', tabName);
 
     try {
-        // Hide all tab content
+        // Hide all tab content first
         document.querySelectorAll('.tab-content').forEach(tab => {
-            if(tab.id !== 'homeTab') { // Don't hide home tab when it's selected
-                tab.classList.add('hidden');
-            }
+            tab.classList.add('hidden');
         });
 
         // Remove active class from all nav items
@@ -94,20 +93,36 @@ export class DashboardManager {
             tab.classList.remove('active');
         });
 
-        // Show selected tab and load its content
-        const tabContent = document.getElementById(`${tabName}Tab`);
-        if (tabContent) {
-            tabContent.classList.remove('hidden');
-            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
-            this.currentTab = tabName;
-            document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
+        // Set active class on clicked tab
+        const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+        }
 
-            if (tabName === 'home') {
-                await this.loadInitialData();
-            } else if (this.tabs[tabName]) {
-                await this.tabs[tabName].load();
+        // Update page title
+        document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
+
+        // Handle tab content and loading
+        if (tabName === 'home') {
+            const homeTab = document.getElementById('homeTab');
+            if (homeTab) {
+                homeTab.classList.remove('hidden');
+            }
+            await this.loadInitialData();
+        } else if (this.tabs[tabName]) {
+            // Load other tab content
+            console.log(`Loading ${tabName} tab content`);
+            await this.tabs[tabName].load();
+            const tabContent = document.getElementById(`${tabName}Tab`);
+            if (tabContent) {
+                tabContent.classList.remove('hidden');
+            } else {
+                console.error(`Tab content not found for ${tabName}`);
             }
         }
+
+        this.currentTab = tabName;
+
     } catch (error) {
         console.error('Error switching tab:', error);
     }
