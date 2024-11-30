@@ -24,15 +24,23 @@ export class DashboardManager {
     }
 
     async loadInitialData() {
-        try {
-            const data = await this.dataStore.getCurrentData();
-            console.log('Initial data loaded:', data);
-            this.updateDashboard(data);
-        } catch (error) {
-            console.error('Failed to load initial data:', error);
-            this.showError('Failed to load initial data');
+    try {
+        const data = await this.dataStore.getCurrentData();
+        console.log('Initial data loaded:', data);
+        
+        // Ensure home tab is visible
+        const homeTab = document.getElementById('homeTab');
+        if (homeTab) {
+            homeTab.classList.remove('hidden');
         }
+        
+        this.updateDashboard(data);
+        this.updateLastUpdated();
+    } catch (error) {
+        console.error('Failed to load initial data:', error);
+        this.showError('Failed to load initial data');
     }
+}
 
     setupTabs() {
         // Initialize tab instances
