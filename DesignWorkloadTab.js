@@ -25,40 +25,32 @@ export class DesignWorkloadTab extends BaseTab {
         }
     }
 
-    createTabContent() {
-        const content = document.createElement('div');
-        content.id = 'designTab';
-        content.className = 'tab-content hidden';
-        
-        content.innerHTML = `
+    
+createTabContent() {
+    return `
+        <div class="space-y-6">
             <!-- File Upload Section -->
-            <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <div class="tab-section">
                 <h3 class="text-lg font-semibold mb-4">Upload Analysis Files</h3>
-                <div class="space-y-6">
+                <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Historical Results File</label>
-                        <div class="mt-1 flex items-center">
-                            <input type="file" id="historicalFile" accept=".xlsx" 
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                        </div>
+                        <input type="file" id="historicalFile" accept=".xlsx" 
+                            class="form-input mt-1 block w-full" />
                         <p class="mt-1 text-sm text-gray-500">Upload Excel file containing historical test results</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Transaction Configuration File</label>
-                        <div class="mt-1 flex items-center">
-                            <input type="file" id="configFile" accept=".xlsx"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                        </div>
+                        <input type="file" id="configFile" accept=".xlsx"
+                            class="form-input mt-1 block w-full" />
                         <p class="mt-1 text-sm text-gray-500">Upload Excel file containing transaction configurations</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Target TPH File</label>
-                        <div class="mt-1 flex items-center">
-                            <input type="file" id="tphFile" accept=".xlsx"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                        </div>
+                        <input type="file" id="tphFile" accept=".xlsx"
+                            class="form-input mt-1 block w-full" />
                         <p class="mt-1 text-sm text-gray-500">Upload Excel file containing target TPH values</p>
                     </div>
 
@@ -70,74 +62,58 @@ export class DesignWorkloadTab extends BaseTab {
                 </div>
             </div>
 
-            <!-- Analysis Results Section (Initially Hidden) -->
-            <div id="analysisResults" class="hidden">
+            <!-- Analysis Results Section -->
+            <div id="analysisResults" class="hidden space-y-6">
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white rounded-lg shadow p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="tab-section">
                         <h3 class="text-gray-500 text-sm">Total Scripts</h3>
-                        <p class="text-3xl font-bold mt-2" id="totalScripts">-</p>
+                        <p class="text-3xl font-bold mt-2" id="totalScriptsAnalysis">-</p>
                     </div>
-                    <div class="bg-white rounded-lg shadow p-6">
+                    <div class="tab-section">
                         <h3 class="text-gray-500 text-sm">Total VUsers</h3>
-                        <p class="text-3xl font-bold mt-2" id="totalVUsers">-</p>
+                        <p class="text-3xl font-bold mt-2" id="totalVUsersAnalysis">-</p>
                     </div>
-                    <div class="bg-white rounded-lg shadow p-6">
+                    <div class="tab-section">
                         <h3 class="text-gray-500 text-sm">Estimated Peak TPH</h3>
                         <p class="text-3xl font-bold mt-2" id="estimatedTPH">-</p>
                     </div>
                 </div>
 
-                <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div class="bg-white rounded-lg shadow p-6">
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="tab-section">
                         <h3 class="text-lg font-semibold mb-4">VUser Distribution</h3>
                         <canvas id="vuserDistChart"></canvas>
                     </div>
-                    <div class="bg-white rounded-lg shadow p-6">
+                    <div class="tab-section">
                         <h3 class="text-lg font-semibold mb-4">Response Time Analysis</h3>
                         <canvas id="rtAnalysisChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Detailed Results Table -->
-                <div class="bg-white rounded-lg shadow p-6 mb-8">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold">Workload Details</h3>
-                        <button id="exportAnalysisBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                            Export Analysis
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Script Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Target TPH</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recommended VUsers</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected RT</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Risk Level</th>
-                                </tr>
-                            </thead>
-                            <tbody id="analysisTableBody" class="bg-white divide-y divide-gray-200">
-                                <!-- Will be populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Recommendations Section -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-4">Recommendations</h3>
-                    <div id="recommendationsContainer" class="space-y-4">
-                        <!-- Will be populated dynamically -->
-                    </div>
+                <!-- Results Table -->
+                <div class="tab-section">
+                    <h3 class="text-lg font-semibold mb-4">Analysis Results</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Script Name</th>
+                                <th>Target TPH</th>
+                                <th>Recommended VUsers</th>
+                                <th>Expected RT</th>
+                                <th>Risk Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analysisTableBody">
+                            <!-- Will be populated dynamically -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        `;
-
-        return content;
-    }
+        </div>
+    `;
+}
 
      async load() {
         try {
