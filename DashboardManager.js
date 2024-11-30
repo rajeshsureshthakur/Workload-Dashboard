@@ -147,25 +147,39 @@ export class DashboardManager {
     }
 
     updateSummaryMetrics(summary) {
-        console.log('Updating summary metrics with:', summary);
-        
-        const metrics = {
-            totalScripts: summary.totalScripts || 0,
-            totalTPH: summary.totalTPH || 0,
-            successRate: summary.successRate || 0,
-            avgResponseTime: summary.avgResponseTime || 0
-        };
+    console.log('Updating summary metrics with:', summary);
+    
+    // Force create elements if they don't exist
+    const metrics = {
+        totalScripts: { value: summary.totalScripts || 0, label: 'Total Scripts' },
+        totalTPH: { value: summary.totalTPH || 0, label: 'Total TPH' },
+        successRate: { value: summary.successRate || 0, label: 'Success Rate' },
+        avgResponseTime: { value: summary.avgResponseTime || 0, label: 'Avg Response Time' }
+    };
 
-        Object.entries(metrics).forEach(([key, value]) => {
-            const element = document.getElementById(key);
-            if (element) {
-                console.log(`Updating ${key} with value:`, value);
-                element.textContent = this.formatMetric(key, value);
-            } else {
-                console.warn(`Element not found for metric: ${key}`);
-            }
-        });
-    }
+    Object.entries(metrics).forEach(([key, data]) => {
+        let element = document.getElementById(key);
+        if (!element) {
+            // Create the metric card if it doesn't exist
+            const card = document.createElement('div');
+            card.className = 'summary-card';
+            card.innerHTML = `
+                <h3 class="text-gray-500 text-sm">${data.label}</h3>
+                <p class="text-3xl font-bold mt-2" id="${key}">-</p>
+            `;
+            document.querySelector('.grid')?.appendChild(card);
+            element = document.getElementById(key);
+        }
+        
+        if (element) {
+            const formattedValue = this.formatMetric(key, data.value);
+            console.log(`Setting ${key} to:`, formattedValue);
+            element.textContent = formattedValue;
+            // Add debug outline
+            element.parentElement.classList.add('debug-outline');
+        }
+    });
+}
 
     updateLastUpdated() {
         const element = document.getElementById('lastUpdated');
