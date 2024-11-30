@@ -12,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen overflow-hidden">
@@ -45,64 +45,112 @@
             </nav>
         </div>
 
-       <!-- Main Content Area -->
-<div class="flex-1 flex flex-col overflow-hidden">
-    <!-- Top Header -->
-    <header class="bg-white shadow">
-        <div class="flex justify-between items-center px-6 py-4">
-            <h2 id="currentPageTitle" class="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-600">Last Updated: <span id="lastUpdated"></span></span>
-                <button id="refreshBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    Refresh Data
-                </button>
-            </div>
-        </div>
-    </header>
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white shadow">
+                <div class="flex justify-between items-center px-6 py-4">
+                    <h2 id="currentPageTitle" class="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-600">Last Updated: <span id="lastUpdated"></span></span>
+                        <button id="refreshBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Refresh Data
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-    <div id="homeTab" class="tab-content">
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-gray-500 text-sm">Total Scripts</h3>
-            <p class="text-3xl font-bold mt-2" id="totalScripts">-</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-gray-500 text-sm">Overall Success Rate</h3>
-            <p class="text-3xl font-bold mt-2" id="successRate">-</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-gray-500 text-sm">Total TPH</h3>
-            <p class="text-3xl font-bold mt-2" id="totalTPH">-</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-gray-500 text-sm">Average Response Time</h3>
-            <p class="text-3xl font-bold mt-2" id="avgResponseTime">-</p>
+            <!-- Main Content -->
+            <main id="mainContent" class="flex-1 overflow-y-auto bg-gray-100 p-6">
+                <!-- Home Tab -->
+                <div id="homeTab" class="tab-content">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-gray-500 text-sm">Total Scripts</h3>
+                            <p class="text-3xl font-bold mt-2" id="totalScripts">-</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-gray-500 text-sm">Overall Success Rate</h3>
+                            <p class="text-3xl font-bold mt-2" id="successRate">-</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-gray-500 text-sm">Total TPH</h3>
+                            <p class="text-3xl font-bold mt-2" id="totalTPH">-</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-gray-500 text-sm">Average Response Time</h3>
+                            <p class="text-3xl font-bold mt-2" id="avgResponseTime">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Response Time Trend</h3>
+                            <canvas id="responseTrendChart"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">TPH Trend</h3>
+                            <canvas id="tphTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Quick Summary Table -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Performance Overview</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full" id="quickSummaryTable">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Script Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current TPH</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Success Rate</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg Response Time</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Will be populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Workload Tab -->
+                <div id="currentTab" class="tab-content hidden">
+                    <!-- Content will be populated by CurrentWorkloadTab.js -->
+                </div>
+
+                <!-- Design Workload Tab -->
+                <div id="designTab" class="tab-content hidden">
+                    <!-- Content will be populated by DesignWorkloadTab.js -->
+                </div>
+
+                <!-- Planned Workload Tab -->
+                <div id="plannedTab" class="tab-content hidden">
+                    <!-- Content will be populated by PlannedWorkloadTab.js -->
+                </div>
+
+                <!-- SLA Metrics Tab -->
+                <div id="slaTab" class="tab-content hidden">
+                    <!-- Content will be populated by SLAMetricsTab.js -->
+                </div>
+
+                <!-- Historical Workloads Tab -->
+                <div id="historicalTab" class="tab-content hidden">
+                    <!-- Content will be populated by HistoricalWorkloadsTab.js -->
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">Response Time Trend</h3>
-            <canvas id="responseTrendChart"></canvas>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">TPH Trend</h3>
-            <canvas id="tphTrendChart"></canvas>
-        </div>
-    </div>
-</div>
-
-    <!-- Main Content -->
-    <main id="mainContent" class="flex-1 overflow-y-auto bg-gray-100 p-6">
-        <!-- Tab content will be inserted here -->
-    </main>
-</div>
-        
+    <!-- Debug Panel -->
     <div id="debugPanel" class="fixed bottom-0 left-0 bg-black text-white p-2 text-xs">
-    Initializing...
+        Initializing...
     </div>
+
     <!-- Application Scripts -->
     <script type="module" src="js/main.js"></script>
 </body>
