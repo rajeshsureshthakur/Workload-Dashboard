@@ -232,30 +232,45 @@ export class PlannedWorkloadTab extends BaseTab {
     }
 
 
-    updateWorkloadTable(scripts) {
+   updateWorkloadTable(scripts = []) {
+    try {
         const tbody = document.getElementById('workloadTableBody');
+        if (!tbody) {
+            console.warn('Workload table body element not found');
+            return;
+        }
+
         tbody.innerHTML = '';
+
+        if (!Array.isArray(scripts)) {
+            console.warn('Invalid scripts data:', scripts);
+            return;
+        }
 
         scripts.forEach(script => {
             const row = this.createWorkloadTableRow(script);
             tbody.appendChild(row);
         });
+    } catch (error) {
+        console.error('Error updating workload table:', error);
     }
+}
 
-    createWorkloadTableRow(script) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">${script.name}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${this.formatNumber(script.plannedTPH)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${script.requiredVUsers}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${script.pacing.toFixed(2)}s</td>
-            <td class="px-6 py-4 whitespace-nowrap">${script.thinkTime.toFixed(2)}s</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                ${this.getStatusBadge(script.status)}
-            </td>
-        `;
-        return row;
-    }
+
+   createWorkloadTableRow(script) {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap">${script.name || 'N/A'}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${this.formatNumber(script.plannedTPH || 0)}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${script.requiredVUsers || 0}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${(script.pacing || 0).toFixed(2)}s</td>
+        <td class="px-6 py-4 whitespace-nowrap">${(script.thinkTime || 0).toFixed(2)}s</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            ${this.getStatusBadge(script.status || 'unknown')}
+        </td>
+    `;
+    return row;
+}
 
     updatePacingStrategy(pacing) {
         const container = document.getElementById('pacingStrategy');
