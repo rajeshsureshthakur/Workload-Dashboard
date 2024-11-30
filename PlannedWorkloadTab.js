@@ -202,16 +202,35 @@ export class PlannedWorkloadTab extends BaseTab {
   
 
     updateCharts(data) {
-        // Update Script Distribution Chart
-        this.charts.scriptDist.data.labels = data.scriptDistribution.labels;
-        this.charts.scriptDist.data.datasets[0].data = data.scriptDistribution.values;
-        this.charts.scriptDist.update();
+        try {
+            // Update Script Distribution Chart
+            if (this.charts.scriptDist) {
+                const scriptData = {
+                    labels: data.scripts?.map(script => script.name) || [],
+                    values: data.scripts?.map(script => script.plannedTPH) || []
+                };
+                
+                this.charts.scriptDist.data.labels = scriptData.labels;
+                this.charts.scriptDist.data.datasets[0].data = scriptData.values;
+                this.charts.scriptDist.update();
+            }
 
-        // Update VUser Distribution Chart
-        this.charts.vuserDist.data.labels = data.vuserDistribution.labels;
-        this.charts.vuserDist.data.datasets[0].data = data.vuserDistribution.values;
-        this.charts.vuserDist.update();
+            // Update VUser Distribution Chart
+            if (this.charts.vuserDist) {
+                const vuserData = {
+                    labels: data.scripts?.map(script => script.name) || [],
+                    values: data.scripts?.map(script => script.requiredVUsers) || []
+                };
+                
+                this.charts.vuserDist.data.labels = vuserData.labels;
+                this.charts.vuserDist.data.datasets[0].data = vuserData.values;
+                this.charts.vuserDist.update();
+            }
+        } catch (error) {
+            console.error('Error updating charts:', error);
+        }
     }
+
 
     updateWorkloadTable(scripts) {
         const tbody = document.getElementById('workloadTableBody');
