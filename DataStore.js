@@ -203,24 +203,71 @@ export class DataStore {
         }
     }
 
+    async getAvailableScripts() {
+    // Return dummy script data
+    return [
+        { id: '1', name: 'Login_Script' },
+        { id: '2', name: 'Search_Script' },
+        { id: '3', name: 'Checkout_Script' },
+        { id: '4', name: 'Browse_Script' }
+    ];
+}
     
-    async getHistoricalData(filters = {}) {
-        let filteredData = [...this.historicalData];
-
-        if (filters.dateRange) {
-            filteredData = this.filterByDateRange(filteredData, filters.dateRange);
+   async getHistoricalData(filters = {}) {
+    return {
+        trends: {
+            dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'],
+            tphData: [
+                {
+                    script: 'Login_Script',
+                    values: [1000, 1200, 1100, 1300, 1250]
+                },
+                {
+                    script: 'Search_Script',
+                    values: [800, 850, 900, 880, 920]
+                }
+            ],
+            rtData: [
+                {
+                    script: 'Login_Script',
+                    values: [1.5, 1.6, 1.4, 1.7, 1.5]
+                },
+                {
+                    script: 'Search_Script',
+                    values: [2.1, 2.0, 2.2, 2.1, 2.0]
+                }
+            ]
+        },
+        results: [
+            {
+                id: '1',
+                date: '2024-05-01',
+                scriptName: 'Login_Script',
+                tph: 1250,
+                vusers: 50,
+                responseTime95th: 1.5,
+                successRate: 99.5,
+                status: 'passed'
+            },
+            {
+                id: '2',
+                date: '2024-05-01',
+                scriptName: 'Search_Script',
+                tph: 920,
+                vusers: 40,
+                responseTime95th: 2.0,
+                successRate: 98.8,
+                status: 'passed'
+            }
+        ],
+        pagination: {
+            currentPage: filters.currentPage || 1,
+            totalPages: 5,
+            totalResults: 50,
+            pageSize: filters.pageSize || 10
         }
-
-        if (filters.scripts && filters.scripts.length > 0) {
-            filteredData = this.filterByScripts(filteredData, filters.scripts);
-        }
-
-        if (filters.status && filters.status !== 'all') {
-            filteredData = this.filterByStatus(filteredData, filters.status);
-        }
-
-        return filteredData;
-    }
+    };
+}
 
     // In DataStore.js
 async getSLAMetrics() {
