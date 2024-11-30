@@ -109,11 +109,20 @@ export class DashboardManager {
     }
 
     updateDashboard(data) {
+        if (!data) {
+            console.warn('No data provided to updateDashboard');
+            return;
+        }
+
         // Update summary metrics
-        this.updateSummaryMetrics(data.summary);
+        if (data.summary) {
+            this.updateSummaryMetrics(data.summary);
+        }
 
         // Update charts
-        this.chartManager.updateCharts(data);
+        if (data.trends) {
+            this.chartManager.updateCharts(data);
+        }
 
         // Update current tab
         if (this.tabs[this.currentTab]) {
@@ -122,15 +131,23 @@ export class DashboardManager {
     }
 
     updateSummaryMetrics(summary) {
-        // Update summary cards
-        Object.entries(summary).forEach(([key, value]) => {
+        if (!summary) {
+            console.warn('No summary data provided');
+            return;
+        }
+
+        // Safely update each metric
+        const metrics = {
+            totalScripts: summary.totalScripts || 0,
+            totalTPH: summary.totalTPH || 0,
+            successRate: summary.successRate || 0,
+            avgResponseTime: summary.avgResponseTime || 0
+        };
+
+        Object.entries(metrics).forEach(([key, value]) => {
             const element = document.getElementById(key);
             if (element) {
-                if (typeof value === 'number') {
-                    element.textContent = this.formatNumber(value);
-                } else {
-                    element.textContent = value;
-                }
+                element.textContent = this.formatMetric(key, value);
             }
         });
     }
@@ -166,6 +183,19 @@ export class DashboardManager {
         console.log(message);
         // Example using alert (replace with proper notification system)
         alert(`Success: ${message}`);
+    }
+
+    formatMetric(key, value) {
+        switch (key) {
+            case 'successRate':
+                return `${value.toFixed(1)}%`;
+            case 'avgResponseTime':
+                return `${value.toFixed(2)}s`;
+            case 'totalTPH':
+                return this.formatNumber(value);
+            default:
+                return value.toString();
+        }
     }
 
     formatNumber(number) {
