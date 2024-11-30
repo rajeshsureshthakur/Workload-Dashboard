@@ -158,19 +158,63 @@ createTabContent() {
         document.getElementById('saveWorkloadBtn').addEventListener('click', () => this.saveWorkloadChanges());
     }
 
-    initializeCharts() {
-        // Initialize Script Distribution Chart
-        this.charts.scriptDist = new Chart(
-            document.getElementById('scriptDistributionChart').getContext('2d'),
-            this.getScriptDistributionConfig()
-        );
+    async initializeCharts() {
+    try {
+        // Wait for next tick to ensure DOM elements exist
+        await new Promise(resolve => setTimeout(resolve, 0));
 
-        // Initialize VUser Distribution Chart
-        this.charts.vuserDist = new Chart(
-            document.getElementById('vuserDistributionChart').getContext('2d'),
-            this.getVUserDistributionConfig()
-        );
+        // Script Distribution Chart
+        const scriptDistCtx = document.getElementById('scriptDistributionChart');
+        if (scriptDistCtx) {
+            this.charts.scriptDist = new Chart(scriptDistCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.5)',
+                            'rgba(16, 185, 129, 0.5)',
+                            'rgba(239, 68, 68, 0.5)',
+                            'rgba(245, 158, 11, 0.5)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // VUser Distribution Chart
+        const vuserDistCtx = document.getElementById('vuserDistributionChart');
+        if (vuserDistCtx) {
+            this.charts.vuserDist = new Chart(vuserDistCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'VUsers',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error initializing charts:', error);
     }
+}
 
   
 
