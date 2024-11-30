@@ -17,14 +17,30 @@ export class BaseTab {
 
     async load() {
         try {
+            console.log(`Loading ${this.tabId} tab`);
             this.showLoading();
-            // ... existing load logic ...
+            const data = await this.dashboardManager.dataStore.getCurrentData();
+            console.log(`Data received for ${this.tabId}:`, data);
+            
+            // Ensure tab container exists
+            let tabContainer = document.getElementById(`${this.tabId}Tab`);
+            if (!tabContainer) {
+                console.log(`Creating container for ${this.tabId}`);
+                tabContainer = document.createElement('div');
+                tabContainer.id = `${this.tabId}Tab`;
+                tabContainer.className = 'tab-content hidden';
+                document.getElementById('mainContent').appendChild(tabContainer);
+            }
+
+            // Update content
+            this.updateContent(data);
             this.hideLoading();
         } catch (error) {
             this.hideLoading();
             console.error(`Error loading ${this.tabId} tab:`, error);
         }
     }
+
 
     update(data) {
         try {
@@ -87,24 +103,18 @@ export class BaseTab {
     showLoading() {
         const tabContent = document.getElementById(`${this.tabId}Tab`);
         if (tabContent) {
-            const loader = document.createElement('div');
-            loader.className = 'loading-overlay';
-            loader.innerHTML = `
-                <div class="flex items-center justify-center h-full">
+            tabContent.innerHTML = `
+                <div class="flex items-center justify-center h-64">
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                 </div>
             `;
-            tabContent.appendChild(loader);
         }
     }
 
-     hideLoading() {
-        const tabContent = document.getElementById(`${this.tabId}Tab`);
-        if (tabContent) {
-            const loader = tabContent.querySelector('.loading-overlay');
-            if (loader) {
-                loader.remove();
-            }
+    hideLoading() {
+        const loader = document.querySelector('.animate-spin')?.parentElement;
+        if (loader) {
+            loader.remove();
         }
     }
 }
