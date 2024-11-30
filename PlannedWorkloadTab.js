@@ -6,6 +6,54 @@ export class PlannedWorkloadTab extends BaseTab {
         this.plannedWorkload = null;
     }
 
+    update(data) {
+        console.log('Updating Planned Workload tab with data:', data);
+        this.updateContent(data);
+    }
+
+    updateContent(data) {
+        if (!data || !data.planned) {
+            console.warn('No planned workload data available');
+            return;
+        }
+
+        try {
+            this.updateSummarySection(data.planned.summary);
+            this.updateCharts(data.planned);
+            this.updateWorkloadTable(data.planned.scripts);
+            this.updatePacingStrategy(data.planned.pacing);
+            this.updateResourceRequirements(data.planned.resources);
+        } catch (error) {
+            console.error('Error updating planned workload content:', error);
+        }
+    }
+
+    updateSummarySection(summary = {}) {
+        const totalTPH = document.getElementById('totalPlannedTPH');
+        if (totalTPH) {
+            totalTPH.textContent = this.formatNumber(summary.totalTPH || 0);
+        }
+    }
+
+    async load() {
+        try {
+            console.log('Loading Planned Workload tab');
+            const data = await this.dashboardManager.dataStore.getPlannedWorkload();
+            this.plannedWorkload = data;
+            
+            // Initialize charts if they haven't been initialized
+            if (Object.keys(this.charts).length === 0) {
+                this.initializeCharts();
+            }
+            
+            this.updateContent({ planned: data });
+        } catch (error) {
+            console.error('Error loading planned workload:', error);
+            this.dashboardManager.showError('Failed to load planned workload data');
+        }
+    }
+
+
     createTabContent() {
         const content = document.createElement('div');
         content.id = 'plannedTab';
@@ -128,17 +176,7 @@ export class PlannedWorkloadTab extends BaseTab {
 
 // Continuing PlannedWorkloadTab class...
 
-    async load() {
-        try {
-            this.plannedWorkload = await this.dashboardManager.dataStore.getPlannedWorkload();
-            this.setupEventListeners();
-            this.initializeCharts();
-            this.updateContent(this.plannedWorkload);
-        } catch (error) {
-            console.error('Error loading planned workload:', error);
-            this.dashboardManager.showError('Failed to load planned workload data');
-        }
-    }
+    
 
     setupEventListeners() {
         document.getElementById('editWorkloadBtn').addEventListener('click', () => this.showEditModal());
@@ -161,17 +199,7 @@ export class PlannedWorkloadTab extends BaseTab {
         );
     }
 
-    updateContent(data) {
-        this.updateSummarySection(data.summary);
-        this.updateCharts(data);
-        this.updateWorkloadTable(data.scripts);
-        this.updatePacingStrategy(data.pacing);
-        this.updateResourceRequirements(data.resources);
-    }
-
-    updateSummarySection(summary) {
-        document.getElementById('totalPlannedTPH').textContent = this.formatNumber(summary.totalTPH);
-    }
+  
 
     updateCharts(data) {
         // Update Script Distribution Chart
