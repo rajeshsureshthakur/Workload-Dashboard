@@ -127,7 +127,7 @@ async getPlannedWorkload() {
                 labels: ['1h', '2h', '3h', '4h', '5h'],
                 responseTimeSeries: [1.8, 1.9, 2.1, 1.9, 1.8],
                 throughputSeries: [450, 500, 480, 520, 500]
-            }
+            },
              planned: await this.getPlannedWorkload()
         };
     }
@@ -213,7 +213,8 @@ async getPlannedWorkload() {
     ];
 }
     
-   async getHistoricalData(filters = {}) {
+   
+async getHistoricalData(filters = {}) {
     return {
         trends: {
             dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'],
