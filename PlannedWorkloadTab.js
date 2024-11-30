@@ -170,12 +170,6 @@ export class PlannedWorkloadTab extends BaseTab {
         
         return content;
     }
-
-    // Continue with additional methods...
-
-
-// Continuing PlannedWorkloadTab class...
-
     
 
     setupEventListeners() {
@@ -272,29 +266,38 @@ export class PlannedWorkloadTab extends BaseTab {
     return row;
 }
 
-    updatePacingStrategy(pacing) {
+   updatePacingStrategy(pacing = {}) {
+    try {
         const container = document.getElementById('pacingStrategy');
+        if (!container) {
+            console.warn('Pacing strategy container not found');
+            return;
+        }
+
         container.innerHTML = `
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-gray-600">Strategy Type:</span>
-                    <span class="font-semibold">${pacing.strategyType}</span>
+                    <span class="font-semibold">${pacing.strategyType || 'N/A'}</span>
                 </div>
                 <div>
                     <h4 class="text-sm font-medium mb-2">Pacing Distribution</h4>
                     <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
-                        ${this.generatePacingDistributionBars(pacing.distribution)}
+                        ${this.generatePacingDistributionBars(pacing.distribution || [])}
                     </div>
                 </div>
                 <div class="text-sm text-gray-600">
-                    <p class="mb-2">${pacing.description}</p>
+                    <p class="mb-2">${pacing.description || 'No description available'}</p>
                     <ul class="list-disc list-inside space-y-1">
-                        ${pacing.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        ${(pacing.recommendations || []).map(rec => `<li>${rec}</li>`).join('')}
                     </ul>
                 </div>
             </div>
         `;
+    } catch (error) {
+        console.error('Error updating pacing strategy:', error);
     }
+}
 
     updateResourceRequirements(resources) {
         const container = document.getElementById('resourceRequirements');
@@ -493,11 +496,12 @@ export class PlannedWorkloadTab extends BaseTab {
     }
 
     // Utility Methods
-    generatePacingDistributionBars(distribution) {
-        return distribution.map(segment => `
-            <div class="h-full bg-blue-500" style="width: ${segment.percentage}%"></div>
-        `).join('');
-    }
+   generatePacingDistributionBars(distribution) {
+    if (!Array.isArray(distribution)) return '';
+    return distribution.map(segment => `
+        <div class="h-full bg-blue-500" style="width: ${segment.percentage || 0}%"></div>
+    `).join('');
+}
 
     getResourceWarningClass(level) {
         const classes = {
