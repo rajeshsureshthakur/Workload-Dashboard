@@ -41,6 +41,27 @@ export class BaseTab {
         }
     }
 
+    updateContent(data) {
+        const tabContent = document.getElementById(`${this.tabId}Tab`);
+        if (!tabContent) {
+            console.error(`Tab content container not found for ${this.tabId}`);
+            return;
+        }
+
+        // Force some visible content
+        tabContent.innerHTML = `
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-bold mb-4">${this.tabId.charAt(0).toUpperCase() + this.tabId.slice(1)} Content</h2>
+                <pre class="bg-gray-100 p-4 rounded">
+                    ${JSON.stringify(data, null, 2)}
+                </pre>
+            </div>
+        `;
+
+        // Add debug outline
+        tabContent.classList.add('debug-outline');
+    }
+
 
     update(data) {
         try {
