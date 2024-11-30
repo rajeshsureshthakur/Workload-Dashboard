@@ -222,9 +222,48 @@ export class DataStore {
         return filteredData;
     }
 
-    async getSLAMetrics() {
-        return this.currentData?.slaMetrics || {};
-    }
+    // In DataStore.js
+async getSLAMetrics() {
+    return {
+        summary: {
+            overallCompliance: 95.5,
+            criticalCount: 2,
+            atRiskCount: 3,
+            healthyCount: 15
+        },
+        trends: {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+            compliance: [96, 95, 97, 94, 95],
+            breaches: [2, 3, 1, 4, 3]
+        },
+        transactions: [
+            {
+                name: 'Login',
+                scriptName: 'Script 1',
+                slaTarget: 2.0,
+                current95thRT: 1.8,
+                margin: 10,
+                status: 'healthy'
+            },
+            {
+                name: 'Search',
+                scriptName: 'Script 2',
+                slaTarget: 3.0,
+                current95thRT: 2.9,
+                margin: 3.3,
+                status: 'warning'
+            }
+        ],
+        distribution: {
+            labels: ['0-1s', '1-2s', '2-3s', '3-4s', '4-5s'],
+            values: [45, 30, 15, 7, 3]
+        },
+        breachHistory: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            values: [2, 3, 1, 4, 2]
+        }
+    };
+}
 
     async getPlannedWorkload() {
         return this.currentData?.plannedWorkload || {};
