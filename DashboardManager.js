@@ -75,42 +75,37 @@ export class DashboardManager {
         }
     }
 
-   async switchTab(tabName) {
-        console.log('Switching to tab:', tabName);
+  // DashboardManager.js
+async switchTab(tabName) {
+    console.log('Switching to tab:', tabName);
 
-        // Debug: Log all tab elements
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            console.log('Tab:', tab.id, 'Hidden:', tab.classList.contains('hidden'));
-        });
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+    });
 
-        // Hide all tabs
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.add('hidden');
-        });
+    // Remove active class from all nav items
+    document.querySelectorAll('[data-tab]').forEach(tab => {
+        tab.classList.remove('active');
+    });
 
-        // Show selected tab
-        const tabContent = document.getElementById(`${tabName}Tab`);
-        if (tabContent) {
-            console.log(`Showing tab: ${tabName}Tab`);
-            tabContent.classList.remove('hidden');
-            
-            // Add this to verify content
-            console.log('Tab content HTML:', tabContent.innerHTML);
-            
-            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
-            this.currentTab = tabName;
+    // Show selected tab
+    const tabContent = document.getElementById(`${tabName}Tab`);
+    if (tabContent) {
+        tabContent.classList.remove('hidden');
+        document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+        this.currentTab = tabName;
 
-            // Update page title
-            document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
+        // Update page title
+        document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
 
-            // Load tab-specific data
-            if (this.tabs[tabName]) {
-                await this.tabs[tabName].load();
-            }
-        } else {
-            console.error(`Tab content element not found: ${tabName}Tab`);
+        // Load tab content if it hasn't been loaded
+        if (this.tabs[tabName] && (!tabContent.innerHTML.trim() || tabContent.dataset.needsRefresh)) {
+            await this.tabs[tabName].load();
+            tabContent.dataset.needsRefresh = 'false';
         }
     }
+}
 
 
 
