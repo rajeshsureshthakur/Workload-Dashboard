@@ -19,27 +19,33 @@ export class BaseTab {
         try {
             console.log(`Loading ${this.tabId} tab`);
             this.showLoading();
-            const data = await this.dashboardManager.dataStore.getCurrentData();
-            console.log(`Data received for ${this.tabId}:`, data);
             
-            // Ensure tab container exists
+            // Create or get tab container
             let tabContainer = document.getElementById(`${this.tabId}Tab`);
             if (!tabContainer) {
                 console.log(`Creating container for ${this.tabId}`);
                 tabContainer = document.createElement('div');
                 tabContainer.id = `${this.tabId}Tab`;
-                tabContainer.className = 'tab-content hidden';
+                tabContainer.className = 'tab-content';
                 document.getElementById('mainContent').appendChild(tabContainer);
             }
 
-            // Update content
+            // Create initial content if empty
+            if (!tabContainer.innerHTML.trim()) {
+                tabContainer.innerHTML = this.createTabContent();
+            }
+
+            const data = await this.dashboardManager.dataStore.getCurrentData();
             this.updateContent(data);
+            this.initializeCharts();
+            this.setupEventListeners();
             this.hideLoading();
         } catch (error) {
             this.hideLoading();
             console.error(`Error loading ${this.tabId} tab:`, error);
         }
     }
+
 
     updateContent(data) {
         const tabContent = document.getElementById(`${this.tabId}Tab`);
@@ -124,16 +130,19 @@ export class BaseTab {
     showLoading() {
         const tabContent = document.getElementById(`${this.tabId}Tab`);
         if (tabContent) {
-            tabContent.innerHTML = `
+            const loader = document.createElement('div');
+            loader.className = 'loading-overlay';
+            loader.innerHTML = `
                 <div class="flex items-center justify-center h-64">
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                 </div>
             `;
+            tabContent.appendChild(loader);
         }
     }
 
     hideLoading() {
-        const loader = document.querySelector('.animate-spin')?.parentElement;
+        const loader = document.querySelector('.loading-overlay');
         if (loader) {
             loader.remove();
         }
