@@ -10,13 +10,60 @@ export class DataStore {
 
     async initialize() {
         try {
-            await this.loadFromLocalStorage();
-            await this.loadFromFiles();
+            // Initialize with dummy data for testing
+            this.currentData = {
+                summary: {
+                    totalScripts: 5,
+                    totalTPH: 1000,
+                    totalVUsers: 100,
+                    successRate: 98.5,
+                    avgResponseTime: 2.3,
+                    slaCompliance: 95.5
+                },
+                trends: {
+                    dates: ['2024-01-01', '2024-01-02', '2024-01-03'],
+                    tphData: [
+                        { script: 'Script1', values: [800, 900, 1000] }
+                    ],
+                    rtData: [
+                        { script: 'Script1', values: [1.5, 1.8, 1.6] }
+                    ]
+                },
+                transactions: [
+                    {
+                        name: 'Transaction1',
+                        scriptName: 'Script1',
+                        responseTime95th: 1.5,
+                        successRate: 99.5,
+                        status: 'healthy'
+                    }
+                ]
+            };
+            
             return true;
         } catch (error) {
-            console.error('Failed to initialize DataStore:', error);
+            console.error('Error initializing DataStore:', error);
             throw error;
         }
+    }
+
+    async getCurrentData() {
+        return this.currentData || {
+            summary: {
+                totalScripts: 0,
+                totalTPH: 0,
+                totalVUsers: 0,
+                successRate: 0,
+                avgResponseTime: 0,
+                slaCompliance: 0
+            },
+            trends: {
+                dates: [],
+                tphData: [],
+                rtData: []
+            },
+            transactions: []
+        };
     }
 
     async loadFromLocalStorage() {
@@ -89,10 +136,7 @@ export class DataStore {
         }
     }
 
-    async getCurrentData() {
-        return this.currentData || {};
-    }
-
+    
     async getHistoricalData(filters = {}) {
         let filteredData = [...this.historicalData];
 
