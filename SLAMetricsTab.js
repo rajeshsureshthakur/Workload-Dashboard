@@ -138,9 +138,12 @@ export class SLAMetricsTab extends BaseTab {
     // Continuing SLAMetricsTab class...
 
     async load() {
+        console.log('Loading SLA Metrics tab');
         try {
             this.slaData = await this.dashboardManager.dataStore.getSLAMetrics();
-            this.setupEventListeners();
+            console.log('SLA Metrics data:', this.slaData);
+            
+            this.destroyCharts();
             this.initializeCharts();
             this.updateContent(this.slaData);
         } catch (error) {
@@ -148,7 +151,7 @@ export class SLAMetricsTab extends BaseTab {
             this.dashboardManager.showError('Failed to load SLA metrics data');
         }
     }
-
+    
     setupEventListeners() {
         document.getElementById('editSLABtn').addEventListener('click', () => this.showEditModal());
         document.getElementById('exportSLABtn').addEventListener('click', () => this.exportSLAConfig());
@@ -176,22 +179,63 @@ export class SLAMetricsTab extends BaseTab {
         );
     }
 
-    updateContent(data) {
-        this.updateSummaryCards(data.summary);
-        this.updateCharts(data);
-        this.updateSLATable(data.transactions);
-        this.updateRiskAnalysis(data.riskAnalysis);
+     updateContent(data) {
+        if (!data) {
+            console.warn('No SLA data provided');
+            return;
+        }
+
+        try {
+            if (data.summary) {
+                this.updateSummaryCards(data.summary);
+            }
+            
+            if (data.trends) {
+                this.updateCharts(data);
+            }
+            
+            if (Array.isArray(data.transactions)) {
+                this.updateSLATable(data.transactions);
+            }
+        } catch (error) {
+            console.error('Error updating SLA content:', error);
+        }
     }
 
     updateSummaryCards(summary) {
-        document.getElementById('overallCompliance').textContent = `${summary.overallCompliance}%`;
-        document.getElementById('criticalTransactions').textContent = summary.criticalCount;
-        document.getElementById('atRiskTransactions').textContent = summary.atRiskCount;
-        document.getElementById('healthyTransactions').textContent = summary.healthyCount;
+        if (!summary) {
+            console.warn('No summary data provided');
+            return;
+        }
 
-        // Update card colors based on compliance level
-        this.updateComplianceCardColors(summary.overallCompliance);
+        try {
+            const elements = {
+                overallCompliance: summary.overallCompliance || 0,
+                criticalTransactions: summary.criticalCount || 0,
+                atRiskTransactions: summary.atRiskCount || 0,
+                healthyTransactions: summary.healthyCount || 0
+            };
+
+            Object.entries(elements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = this.formatValue(id, value);
+                }
+            });
+        } catch (error) {
+            console.error('Error updating summary cards:', error);
+        }
     }
+
+    formatValue(id, value) {
+        switch (id) {
+            case 'overallCompliance':
+                return `${value.toFixed(1)}%`;
+            default:
+                return value.toString();
+        }
+    }
+
 
     updateComplianceCardColors(compliance) {
         const card = document.getElementById('overallCompliance').parentElement;
@@ -204,21 +248,31 @@ export class SLAMetricsTab extends BaseTab {
         }
     }
 
-    updateCharts(data) {
-        // Update SLA Trend Chart
-        this.charts.slaTrend.data.labels = data.trends.labels;
-        this.charts.slaTrend.data.datasets[0].data = data.trends.values;
-        this.charts.slaTrend.update();
+   updateCharts(data) {
+        try {
+            // Update SLA Trend Chart
+            if (this.charts.slaTrend && data.trends) {
+                this.charts.slaTrend.data.labels = data.trends.labels;
+                this.charts.slaTrend.data.datasets[0].data = data.trends.compliance;
+                this.charts.slaTrend.update();
+            }
 
-        // Update Response Distribution Chart
-        this.charts.responseDist.data.labels = data.distribution.labels;
-        this.charts.responseDist.data.datasets[0].data = data.distribution.values;
-        this.charts.responseDist.update();
+            // Update Response Distribution Chart
+            if (this.charts.responseDist && data.distribution) {
+                this.charts.responseDist.data.labels = data.distribution.labels;
+                this.charts.responseDist.data.datasets[0].data = data.distribution.values;
+                this.charts.responseDist.update();
+            }
 
-        // Update Breach History Chart
-        this.charts.breachHistory.data.labels = data.breachHistory.labels;
-        this.charts.breachHistory.data.datasets[0].data = data.breachHistory.values;
-        this.charts.breachHistory.update();
+            // Update Breach History Chart
+            if (this.charts.breachHistory && data.breachHistory) {
+                this.charts.breachHistory.data.labels = data.breachHistory.labels;
+                this.charts.breachHistory.data.datasets[0].data = data.breachHistory.values;
+                this.charts.breachHistory.update();
+            }
+        } catch (error) {
+            console.error('Error updating charts:', error);
+        }
     }
 
     updateSLATable(transactions) {
