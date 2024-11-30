@@ -1,11 +1,3 @@
-import { DataStore } from '../data/DataStore.js';
-import { ChartManager } from './ChartManager.js';
-import { CurrentWorkloadTab } from '../tabs/CurrentWorkloadTab.js';
-import { DesignWorkloadTab } from '../tabs/DesignWorkloadTab.js';
-import { PlannedWorkloadTab } from '../tabs/PlannedWorkloadTab.js';
-import { SLAMetricsTab } from '../tabs/SLAMetricsTab.js';
-import { HistoricalWorkloadsTab } from '../tabs/HistoricalWorkloadsTab.js';
-
 export class DashboardManager {
     constructor() {
         this.dataStore = new DataStore();
@@ -31,7 +23,18 @@ export class DashboardManager {
         }
     }
 
- setupTabs() {
+    async loadInitialData() {
+        try {
+            const data = await this.dataStore.getCurrentData();
+            console.log('Initial data loaded:', data);
+            this.updateDashboard(data);
+        } catch (error) {
+            console.error('Failed to load initial data:', error);
+            this.showError('Failed to load initial data');
+        }
+    }
+
+    setupTabs() {
         // Initialize tab instances
         this.tabs = {
             current: new CurrentWorkloadTab(this),
@@ -42,7 +45,7 @@ export class DashboardManager {
         };
     }
 
-   setupEventListeners() {
+    setupEventListeners() {
         // Tab navigation
         document.querySelectorAll('[data-tab]').forEach(tab => {
             tab.addEventListener('click', async (e) => {
@@ -53,22 +56,13 @@ export class DashboardManager {
         });
 
         // Refresh button
-        document.getElementById('refreshBtn')?.addEventListener('click', () => this.refreshData());
-    }
-
-    async loadInitialData() {
-        try {
-            const data = await this.dataStore.getCurrentData();
-            console.log('Initial data loaded:', data); // Add this log
-            this.updateDashboard(data);
-        } catch (error) {
-            console.error('Failed to load initial data:', error);
-            this.showError('Failed to load initial data');
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => this.refreshData());
         }
     }
 
-  // DashboardManager.js
- async switchTab(tabName) {
+    async switchTab(tabName) {
         console.log('Switching to tab:', tabName);
 
         // Hide all tab content
@@ -82,44 +76,31 @@ export class DashboardManager {
         });
 
         // Show selected tab and load its content
-        if (this.tabs[tabName]) {
-            await this.tabs[tabName].load();
-            const tabContent = document.getElementById(`${tabName}Tab`);
-            if (tabContent) {
-                tabContent.classList.remove('hidden');
-                document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
-                this.currentTab = tabName;
-                document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
+        const tabContent = document.getElementById(`${tabName}Tab`);
+        if (tabContent) {
+            tabContent.classList.remove('hidden');
+            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+            this.currentTab = tabName;
+            document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
+
+            if (this.tabs[tabName]) {
+                await this.tabs[tabName].load();
+            } else if (tabName === 'home') {
+                await this.loadInitialData();
             }
         }
     }
 
-
-
-   async refreshData() {
-    try {
-        console.log('Refreshing data...');
-        const data = await this.dataStore.getCurrentData();
-        this.updateDashboard(data);
-        this.updateLastUpdated();
-        console.log('Data refreshed successfully');
-    } catch (error) {
-        console.error('Refresh error:', error);
-        this.showError('Failed to refresh data');
-    }
-}
-
-
-   updateDashboard(data) {
-        console.log('Updating dashboard with data:', data); // Add this log
-        if (!data) {
-            console.warn('No data provided to updateDashboard');
-            return;
-        }
+    updateDashboard(data) {
+        console.log('Updating dashboard with data:', data);
+        if (!data || !data.summary) return;
 
         // Update summary metrics
-        if (data.summary) {
-            this.updateSummaryMetrics(data.summary);
+        this.updateSummaryMetrics(data.summary);
+
+        // Update charts if available
+        if (data.trends) {
+            this.chartManager.updateCharts(data.trends);
         }
 
         // Update current tab
@@ -129,39 +110,41 @@ export class DashboardManager {
     }
 
     updateSummaryMetrics(summary) {
-    console.log('Updating summary metrics with:', summary);
-    
-    // Force create elements if they don't exist
-    const metrics = {
-        totalScripts: { value: summary.totalScripts || 0, label: 'Total Scripts' },
-        totalTPH: { value: summary.totalTPH || 0, label: 'Total TPH' },
-        successRate: { value: summary.successRate || 0, label: 'Success Rate' },
-        avgResponseTime: { value: summary.avgResponseTime || 0, label: 'Avg Response Time' }
-    };
+        const metrics = {
+            'totalScripts': summary.totalScripts || 0,
+            'totalTPH': summary.totalTPH || 0,
+            'successRate': summary.successRate || 0,
+            'avgResponseTime': summary.avgResponseTime || 0
+        };
 
-    Object.entries(metrics).forEach(([key, data]) => {
-        let element = document.getElementById(key);
-        if (!element) {
-            // Create the metric card if it doesn't exist
-            const card = document.createElement('div');
-            card.className = 'summary-card';
-            card.innerHTML = `
-                <h3 class="text-gray-500 text-sm">${data.label}</h3>
-                <p class="text-3xl font-bold mt-2" id="${key}">-</p>
-            `;
-            document.querySelector('.grid')?.appendChild(card);
-            element = document.getElementById(key);
+        Object.entries(metrics).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                console.log(`Updating ${id} with value:`, value);
+                if (id === 'successRate') {
+                    element.textContent = `${value.toFixed(1)}%`;
+                } else if (id === 'avgResponseTime') {
+                    element.textContent = `${value.toFixed(2)}s`;
+                } else {
+                    element.textContent = value.toString();
+                }
+            } else {
+                console.warn(`Element not found for ${id}`);
+            }
+        });
+    }
+
+    async refreshData() {
+        try {
+            const data = await this.dataStore.getCurrentData();
+            this.updateDashboard(data);
+            this.updateLastUpdated();
+            console.log('Data refreshed successfully');
+        } catch (error) {
+            console.error('Refresh error:', error);
+            this.showError('Failed to refresh data');
         }
-        
-        if (element) {
-            const formattedValue = this.formatMetric(key, data.value);
-            console.log(`Setting ${key} to:`, formattedValue);
-            element.textContent = formattedValue;
-            // Add debug outline
-            element.parentElement.classList.add('debug-outline');
-        }
-    });
-}
+    }
 
     updateLastUpdated() {
         const element = document.getElementById('lastUpdated');
@@ -183,44 +166,12 @@ export class DashboardManager {
     }
 
     showError(message) {
-        // Implementation depends on your preferred notification system
         console.error(message);
-        // Example using alert (replace with proper notification system)
-        alert(`Error: ${message}`);
+        // Add your error notification implementation here
     }
 
     showSuccess(message) {
-        // Implementation depends on your preferred notification system
         console.log(message);
-        // Example using alert (replace with proper notification system)
-        alert(`Success: ${message}`);
-    }
-
-     formatMetric(key, value) {
-        switch (key) {
-            case 'successRate':
-                return `${value.toFixed(1)}%`;
-            case 'avgResponseTime':
-                return `${value.toFixed(2)}s`;
-            case 'totalTPH':
-                return this.formatNumber(value);
-            default:
-                return value.toString();
-        }
-    }
-
-    formatNumber(number) {
-        return new Intl.NumberFormat().format(number);
-    }
-
-    // Export functionality
-    async exportData(format = 'excel') {
-        try {
-            await this.dataStore.exportData(format);
-            this.showSuccess('Data exported successfully');
-        } catch (error) {
-            this.showError('Failed to export data');
-            console.error('Export error:', error);
-        }
+        // Add your success notification implementation here
     }
 }
