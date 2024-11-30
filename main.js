@@ -1,14 +1,17 @@
 import { DashboardManager } from './dashboard/DashboardManager.js';
 
-const debugPanel = document.getElementById('debugPanel');
-
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        debugPanel.textContent = 'Initializing Dashboard...';
+        console.log('Initializing dashboard...');
         window.dashboardManager = new DashboardManager();
-        debugPanel.textContent = 'Dashboard Initialized Successfully';
+        
+        // Debug: Check if initial data is loaded
+        const data = await window.dashboardManager.dataStore.getCurrentData();
+        console.log('Initial data:', data);
+        
+        // Debug: Try switching to home tab
+        await window.dashboardManager.switchTab('home');
     } catch (error) {
-        console.error('Initialization error:', error);
-        debugPanel.textContent = `Error: ${error.message}`;
+        console.error('Dashboard initialization error:', error);
     }
 });
