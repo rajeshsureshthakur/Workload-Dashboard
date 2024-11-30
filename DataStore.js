@@ -48,23 +48,40 @@ export class DataStore {
     }
 
     async getCurrentData() {
-        return this.currentData || {
-            summary: {
-                totalScripts: 0,
-                totalTPH: 0,
-                totalVUsers: 0,
-                successRate: 0,
-                avgResponseTime: 0,
-                slaCompliance: 0
+    // Return dummy data for testing
+    return {
+        summary: {
+            totalScripts: 5,
+            totalTPH: 1500,
+            successRate: 98.5,
+            avgResponseTime: 2.3,
+            totalVUsers: 100,
+            slaCompliance: 95
+        },
+        trends: {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+            performance: [85, 88, 92, 89, 91],
+            responseTime: [2.1, 2.3, 2.0, 2.2, 2.1],
+            throughput: [1200, 1300, 1450, 1400, 1500]
+        },
+        scripts: [
+            {
+                name: 'Script 1',
+                tph: 500,
+                vusers: 30,
+                responseTime: 2.1,
+                successRate: 99.1
             },
-            trends: {
-                dates: [],
-                tphData: [],
-                rtData: []
-            },
-            transactions: []
-        };
-    }
+            {
+                name: 'Script 2',
+                tph: 1000,
+                vusers: 70,
+                responseTime: 2.4,
+                successRate: 98.2
+            }
+        ]
+    };
+}
 
     async loadFromLocalStorage() {
         try {
