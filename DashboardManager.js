@@ -18,17 +18,21 @@ export class DashboardManager {
     async init() {
         try {
             await this.dataStore.initialize();
-            this.setupTabs();
+            await this.setupTabs();  // Make this async
             this.setupEventListeners();
-            this.loadInitialData();
+            await this.loadInitialData();
             this.updateLastUpdated();
+            
+            // Switch to home tab by default
+            await this.switchTab('home');
         } catch (error) {
-            this.showError('Failed to initialize dashboard');
             console.error('Initialization error:', error);
+            this.showError('Failed to initialize dashboard');
         }
     }
 
-    setupTabs() {
+   async setupTabs() {
+        // Create instances of all tabs
         this.tabs = {
             current: new CurrentWorkloadTab(this),
             design: new DesignWorkloadTab(this),
@@ -36,25 +40,27 @@ export class DashboardManager {
             sla: new SLAMetricsTab(this),
             historical: new HistoricalWorkloadsTab(this)
         };
+
+        // Initialize each tab's content
+        for (const [tabName, tabInstance] of Object.entries(this.tabs)) {
+            const tabContent = tabInstance.createTabContent();
+            document.getElementById('mainContent').appendChild(tabContent);
+        }
     }
 
-    setupEventListeners() {
-    // Tab navigation
-    document.querySelectorAll('[data-tab]').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            e.preventDefault();
-            const tabName = e.target.getAttribute('data-tab');
-            console.log('Tab clicked:', tabName); // Debug log
-            this.switchTab(tabName);
+   setupEventListeners() {
+        // Tab navigation
+        document.querySelectorAll('[data-tab]').forEach(tab => {
+            tab.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const tabName = e.target.getAttribute('data-tab');
+                await this.switchTab(tabName);
+            });
         });
-    });
 
-    // Refresh button
-    const refreshBtn = document.getElementById('refreshBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => this.refreshData());
+        // Refresh button
+        document.getElementById('refreshBtn')?.addEventListener('click', () => this.refreshData());
     }
-}
 
     async loadInitialData() {
         try {
@@ -67,36 +73,34 @@ export class DashboardManager {
     }
 
     async switchTab(tabName) {
-    console.log('Switching to tab:', tabName); // Debug log
+        console.log('Switching to tab:', tabName);
 
-    // Hide all tab content
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.add('hidden');
-    });
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
 
-    // Remove active class from all nav items
-    document.querySelectorAll('[data-tab]').forEach(tab => {
-        tab.classList.remove('active');
-    });
+        // Remove active class from navigation items
+        document.querySelectorAll('[data-tab]').forEach(tab => {
+            tab.classList.remove('active');
+        });
 
-    // Show selected tab
-    const tabContent = document.getElementById(`${tabName}Tab`);
-    if (tabContent) {
-        tabContent.classList.remove('hidden');
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-        this.currentTab = tabName;
-        
-        // Update page title
-        document.getElementById('currentPageTitle').textContent = 
-            this.getTabTitle(tabName);
+        // Show selected tab
+        const tabContent = document.getElementById(`${tabName}Tab`);
+        if (tabContent) {
+            tabContent.classList.remove('hidden');
+            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+            this.currentTab = tabName;
 
-        // Load tab-specific data
-        if (this.tabs[tabName]) {
-            await this.tabs[tabName].load();
+            // Update page title
+            document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
+
+            // Load tab-specific data
+            if (this.tabs[tabName]) {
+                await this.tabs[tabName].load();
+            }
         }
     }
-    console.log('Tab switch complete'); // Debug log
-}
 
     async refreshData() {
         try {
