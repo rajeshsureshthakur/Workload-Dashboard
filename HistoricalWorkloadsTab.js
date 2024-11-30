@@ -344,43 +344,72 @@ export class HistoricalWorkloadsTab extends BaseTab {
         this.updateCompareButtonState();
     }
 
+    formatDateTime(dateString) {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return dateString || 'N/A';
+        }
+    }
+
+    formatNumber(number) {
+        try {
+            return new Intl.NumberFormat().format(number);
+        } catch (error) {
+            return number || 0;
+        }
+    }
+
     createHistoricalTableRow(result) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">
-                <input type="checkbox" class="test-select rounded" data-test-id="${result.id}">
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">${this.formatDateTime(result.date)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${result.scriptName}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${this.formatNumber(result.tph)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${result.vusers}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${result.responseTime95th}s</td>
-            <td class="px-6 py-4 whitespace-nowrap">${result.successRate}%</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                ${this.getStatusBadge(result.status)}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <button class="text-blue-600 hover:text-blue-800 mr-2" 
-                    onclick="viewDetails('${result.id}')">
-                    View
-                </button>
-                <button class="text-green-600 hover:text-green-800"
-                    onclick="downloadReport('${result.id}')">
-                    Download
-                </button>
-            </td>
+        try {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <input type="checkbox" class="test-select rounded" data-test-id="${result.id || ''}">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">${this.formatDateTime(result.date)}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${result.scriptName || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${this.formatNumber(result.tph || 0)}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${result.vusers || 0}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${(result.responseTime95th || 0).toFixed(2)}s</td>
+                <td class="px-6 py-4 whitespace-nowrap">${(result.successRate || 0).toFixed(1)}%</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    ${this.getStatusBadge(result.status || 'unknown')}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <button class="text-blue-600 hover:text-blue-800 mr-2" 
+                        onclick="viewDetails('${result.id || ''}')">
+                        View
+                    </button>
+                    <button class="text-green-600 hover:text-green-800"
+                        onclick="downloadReport('${result.id || ''}')">
+                        Download
+                    </button>
+                </td>
+            `;
+
+            return row;
+        } catch (error) {
+            console.error('Error creating historical table row:', error);
+            return document.createElement('tr');
+        }
+    }
+
+    getStatusBadge(status) {
+        const classes = {
+            passed: 'bg-green-100 text-green-800',
+            failed: 'bg-red-100 text-red-800',
+            warning: 'bg-yellow-100 text-yellow-800',
+            unknown: 'bg-gray-100 text-gray-800'
+        };
+
+        return `
+            <span class="px-2 py-1 text-xs font-semibold rounded-full ${classes[status] || classes.unknown}">
+                ${status.toUpperCase()}
+            </span>
         `;
-
-        // Add row click handler
-        row.addEventListener('click', (e) => {
-            if (!e.target.matches('input[type="checkbox"], button')) {
-                const checkbox = row.querySelector('.test-select');
-                checkbox.checked = !checkbox.checked;
-                this.updateCompareButtonState();
-            }
-        });
-
-        return row;
     }
 
     updatePagination(pagination) {
