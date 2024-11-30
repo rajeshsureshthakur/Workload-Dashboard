@@ -17,24 +17,22 @@ export class DashboardManager {
 
     async init() {
         try {
-            console.log('Initializing DashboardManager');
             await this.dataStore.initialize();
             this.setupTabs();
             this.setupEventListeners();
             await this.loadInitialData();
             this.updateLastUpdated();
             
-            // Explicitly switch to home tab after initialization
+            // Switch to home tab by default
             await this.switchTab('home');
-            console.log('Initialization complete');
         } catch (error) {
             console.error('Initialization error:', error);
             this.showError('Failed to initialize dashboard');
         }
     }
 
-   async setupTabs() {
-        // Create instances of all tabs
+ setupTabs() {
+        // Initialize tab instances
         this.tabs = {
             current: new CurrentWorkloadTab(this),
             design: new DesignWorkloadTab(this),
@@ -42,12 +40,6 @@ export class DashboardManager {
             sla: new SLAMetricsTab(this),
             historical: new HistoricalWorkloadsTab(this)
         };
-
-        // Initialize each tab's content
-        for (const [tabName, tabInstance] of Object.entries(this.tabs)) {
-            const tabContent = tabInstance.createTabContent();
-            document.getElementById('mainContent').appendChild(tabContent);
-        }
     }
 
    setupEventListeners() {
@@ -76,36 +68,31 @@ export class DashboardManager {
     }
 
   // DashboardManager.js
-async switchTab(tabName) {
-    console.log('Switching to tab:', tabName);
+ async switchTab(tabName) {
+        console.log('Switching to tab:', tabName);
 
-    // Hide all tabs
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.add('hidden');
-    });
+        // Hide all tab content
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
 
-    // Remove active class from all nav items
-    document.querySelectorAll('[data-tab]').forEach(tab => {
-        tab.classList.remove('active');
-    });
+        // Remove active class from all nav items
+        document.querySelectorAll('[data-tab]').forEach(tab => {
+            tab.classList.remove('active');
+        });
 
-    // Show selected tab
-    const tabContent = document.getElementById(`${tabName}Tab`);
-    if (tabContent) {
-        tabContent.classList.remove('hidden');
-        document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
-        this.currentTab = tabName;
-
-        // Update page title
-        document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
-
-        // Load tab content if it hasn't been loaded
-        if (this.tabs[tabName] && (!tabContent.innerHTML.trim() || tabContent.dataset.needsRefresh)) {
+        // Show selected tab and load its content
+        if (this.tabs[tabName]) {
             await this.tabs[tabName].load();
-            tabContent.dataset.needsRefresh = 'false';
+            const tabContent = document.getElementById(`${tabName}Tab`);
+            if (tabContent) {
+                tabContent.classList.remove('hidden');
+                document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+                this.currentTab = tabName;
+                document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
+            }
         }
     }
-}
 
 
 
