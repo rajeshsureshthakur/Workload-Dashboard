@@ -84,11 +84,13 @@ export class CurrentWorkloadTab extends BaseTab {
     }
 
     async load() {
+        console.log('Loading Current Workload tab');
         try {
-            const currentData = await this.dashboardManager.dataStore.getCurrentData();
-            this.updateContent(currentData);
+            const data = await this.dashboardManager.dataStore.getCurrentData();
+            console.log('Current Workload data:', data);
+            this.destroyCharts();
             this.initializeCharts();
-            this.setupEventListeners();
+            this.updateContent(data);
         } catch (error) {
             console.error('Error loading current workload data:', error);
             this.dashboardManager.showError('Failed to load current workload data');
@@ -101,19 +103,25 @@ export class CurrentWorkloadTab extends BaseTab {
 
     initializeCharts() {
         // Response Time Chart
-        this.charts.responseTime = new Chart(
-            document.getElementById('currentRTChart').getContext('2d'),
-            this.getResponseTimeChartConfig()
-        );
+        const rtCtx = document.getElementById('currentRTChart')?.getContext('2d');
+        if (rtCtx) {
+            this.charts.responseTime = new Chart(rtCtx, this.getResponseTimeChartConfig());
+        }
 
         // Throughput Chart
-        this.charts.throughput = new Chart(
-            document.getElementById('currentTPHChart').getContext('2d'),
-            this.getThroughputChartConfig()
-        );
+        const tpCtx = document.getElementById('currentTPHChart')?.getContext('2d');
+        if (tpCtx) {
+            this.charts.throughput = new Chart(tpCtx, this.getThroughputChartConfig());
+        }
     }
 
-    updateContent(data) {
+    update(data) {
+        console.log('Updating Current Workload tab with data:', data);
+        this.updateContent(data);
+    }
+
+
+   updateContent(data) {
         if (!data) {
             console.warn('No data provided to updateContent');
             return;
@@ -130,14 +138,12 @@ export class CurrentWorkloadTab extends BaseTab {
             
             if (Array.isArray(data.transactions)) {
                 this.updateTransactionTable(data.transactions);
-            } else {
-                console.warn('No transactions array in data');
-                this.updateTransactionTable([]); // Pass empty array as fallback
             }
         } catch (error) {
             console.error('Error updating content:', error);
         }
     }
+
 
      updateSummaryCards(summary) {
         const elements = {
@@ -156,16 +162,14 @@ export class CurrentWorkloadTab extends BaseTab {
     }
 
     updateCharts(trends) {
-        // Update Response Time Chart
         if (this.charts.responseTime) {
-            this.charts.responseTime.data.labels = trends.timeLabels;
+            this.charts.responseTime.data.labels = trends.labels;
             this.charts.responseTime.data.datasets[0].data = trends.responseTimeSeries;
             this.charts.responseTime.update();
         }
 
-        // Update Throughput Chart
         if (this.charts.throughput) {
-            this.charts.throughput.data.labels = trends.timeLabels;
+            this.charts.throughput.data.labels = trends.labels;
             this.charts.throughput.data.datasets[0].data = trends.throughputSeries;
             this.charts.throughput.update();
         }
@@ -249,13 +253,13 @@ export class CurrentWorkloadTab extends BaseTab {
     }
 
     // Chart Configurations
-    getResponseTimeChartConfig() {
+  getResponseTimeChartConfig() {
         return {
             type: 'line',
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Response Time (s)',
+                    label: 'Response Time',
                     data: [],
                     borderColor: 'rgb(59, 130, 246)',
                     tension: 0.1
@@ -263,23 +267,18 @@ export class CurrentWorkloadTab extends BaseTab {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+                maintainAspectRatio: false
             }
         };
     }
 
-    getThroughputChartConfig() {
+   getThroughputChartConfig() {
         return {
             type: 'line',
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Throughput (TPH)',
+                    label: 'Throughput',
                     data: [],
                     borderColor: 'rgb(16, 185, 129)',
                     tension: 0.1
@@ -287,16 +286,10 @@ export class CurrentWorkloadTab extends BaseTab {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+                maintainAspectRatio: false
             }
         };
     }
-
     // Utility Methods
     formatNumber(number) {
         return new Intl.NumberFormat().format(number);
