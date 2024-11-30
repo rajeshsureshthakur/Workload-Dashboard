@@ -12,21 +12,40 @@ export class PlannedWorkloadTab extends BaseTab {
     }
 
     updateContent(data) {
-        if (!data || !data.planned) {
-            console.warn('No planned workload data available');
+    try {
+        if (!data || typeof data !== 'object') {
+            console.warn('Invalid data provided to updateContent');
             return;
         }
 
-        try {
-            this.updateSummarySection(data.planned.summary);
-            this.updateCharts(data.planned);
-            this.updateWorkloadTable(data.planned.scripts);
-            this.updatePacingStrategy(data.planned.pacing);
-            this.updateResourceRequirements(data.planned.resources);
-        } catch (error) {
-            console.error('Error updating planned workload content:', error);
+        // Update summary section if available
+        if (data.summary) {
+            this.updateSummarySection(data.summary);
         }
+
+        // Update charts if available
+        if (data.scripts) {
+            this.updateCharts(data);
+        }
+
+        // Update workload table if scripts array is available
+        if (Array.isArray(data.scripts)) {
+            this.updateWorkloadTable(data.scripts);
+        }
+
+        // Update pacing strategy if available
+        if (data.pacing) {
+            this.updatePacingStrategy(data.pacing);
+        }
+
+        // Update resource requirements if available
+        if (data.resources) {
+            this.updateResourceRequirements(data.resources);
+        }
+    } catch (error) {
+        console.error('Error updating planned workload content:', error);
     }
+}
 
     updateSummarySection(summary = {}) {
         const totalTPH = document.getElementById('totalPlannedTPH');
@@ -299,34 +318,43 @@ export class PlannedWorkloadTab extends BaseTab {
     }
 }
 
-    updateResourceRequirements(resources) {
+    updateResourceRequirements(resources = {}) {
+    try {
         const container = document.getElementById('resourceRequirements');
+        if (!container) {
+            console.warn('Resource requirements container not found');
+            return;
+        }
+
         container.innerHTML = `
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Total VUsers:</span>
-                    <span class="font-semibold">${resources.totalVUsers}</span>
+                    <span class="font-semibold">${resources.totalVUsers || 0}</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Memory Usage:</span>
-                    <span class="font-semibold">${resources.estimatedMemory} GB</span>
+                    <span class="font-semibold">${resources.estimatedMemory || 0} GB</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">CPU Cores:</span>
-                    <span class="font-semibold">${resources.estimatedCPU}</span>
+                    <span class="font-semibold">${resources.estimatedCPU || 0}</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Network Bandwidth:</span>
-                    <span class="font-semibold">${resources.estimatedBandwidth} Mbps</span>
+                    <span class="font-semibold">${resources.estimatedBandwidth || 0} Mbps</span>
                 </div>
                 <div class="mt-4 pt-3 border-t">
-                    <div class="text-sm ${this.getResourceWarningClass(resources.warningLevel)}">
+                    <div class="text-sm ${this.getResourceWarningClass(resources.warningLevel || 'low')}">
                         ${this.getResourceWarningMessage(resources)}
                     </div>
                 </div>
             </div>
         `;
+    } catch (error) {
+        console.error('Error updating resource requirements:', error);
     }
+}
 
     showEditModal() {
         const modal = document.getElementById('editWorkloadModal');
@@ -503,21 +531,29 @@ export class PlannedWorkloadTab extends BaseTab {
     `).join('');
 }
 
-    getResourceWarningClass(level) {
-        const classes = {
-            high: 'text-red-600',
-            medium: 'text-yellow-600',
-            low: 'text-green-600'
-        };
-        return classes[level] || 'text-gray-600';
+  getResourceWarningClass(level) {
+    const classes = {
+        high: 'text-red-600',
+        medium: 'text-yellow-600',
+        low: 'text-green-600'
+    };
+    return classes[level] || 'text-gray-600';
+}
+
+    getResourceWarningMessage(resources = {}) {
+    if (!resources.warningLevel) {
+        return 'Resource information not available';
     }
 
-    getResourceWarningMessage(resources) {
-        if (resources.warningLevel === 'high') {
+    switch (resources.warningLevel) {
+        case 'high':
             return 'Warning: Resource requirements exceed recommended limits';
-        } else if (resources.warningLevel === 'medium') {
+        case 'medium':
             return 'Note: Resource usage approaching recommended limits';
-        }
-        return 'Resource requirements within acceptable range';
+        case 'low':
+            return 'Resource requirements within acceptable range';
+        default:
+            return 'Resource status unknown';
     }
+}
 }
