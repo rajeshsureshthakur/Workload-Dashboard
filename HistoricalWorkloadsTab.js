@@ -14,18 +14,14 @@ export class HistoricalWorkloadsTab extends BaseTab {
     }
 
     createTabContent() {
-        const content = document.createElement('div');
-        content.id = 'historicalTab';
-        content.className = 'tab-content hidden';
-        
-        content.innerHTML = `
-            <!-- Filters Section -->
-            <div class="bg-white rounded-lg shadow p-6 mb-8">
+    return `
+        <div class="space-y-6">
+            <!-- Filters -->
+            <div class="tab-section">
                 <div class="flex flex-wrap items-center justify-between gap-4">
-                    <!-- Date Range Filter -->
                     <div class="flex items-center space-x-4">
                         <label class="text-sm font-medium text-gray-700">Date Range:</label>
-                        <select id="dateRangeFilter" class="rounded-md border-gray-300 shadow-sm">
+                        <select id="dateRangeFilter" class="form-select rounded-md">
                             <option value="1week">Last Week</option>
                             <option value="1month" selected>Last Month</option>
                             <option value="3months">Last 3 Months</option>
@@ -33,95 +29,61 @@ export class HistoricalWorkloadsTab extends BaseTab {
                             <option value="custom">Custom Range</option>
                         </select>
                     </div>
-
-                    <!-- Script Filter -->
                     <div class="flex items-center space-x-4">
-                        <label class="text-sm font-medium text-gray-700">Scripts:</label>
-                        <select id="scriptFilter" class="rounded-md border-gray-300 shadow-sm" multiple>
+                        <label class="text-sm font-medium text-gray-700">Script:</label>
+                        <select id="scriptFilter" class="form-select rounded-md" multiple>
                             <!-- Will be populated dynamically -->
                         </select>
                     </div>
-
-                    <!-- Status Filter -->
                     <div class="flex items-center space-x-4">
                         <label class="text-sm font-medium text-gray-700">Status:</label>
-                        <select id="statusFilter" class="rounded-md border-gray-300 shadow-sm">
+                        <select id="statusFilter" class="form-select rounded-md">
                             <option value="all">All Status</option>
                             <option value="passed">Passed</option>
                             <option value="failed">Failed</option>
                             <option value="warning">Warning</option>
                         </select>
                     </div>
-
-                    <!-- Apply Filters Button -->
                     <button id="applyFilters" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                         Apply Filters
                     </button>
                 </div>
             </div>
 
-            <!-- Trends Overview -->
+            <!-- Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- TPH Trend -->
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">TPH Trend</h3>
                     <canvas id="tphTrendHistoryChart"></canvas>
                 </div>
-
-                <!-- Response Time Trend -->
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">Response Time Trend</h3>
                     <canvas id="rtTrendHistoryChart"></canvas>
                 </div>
             </div>
 
             <!-- Historical Data Table -->
-            <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <div class="tab-section">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Historical Test Results</h3>
-                    <div class="flex space-x-2">
-                        <button id="compareSelectedBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" disabled>
-                            Compare Selected
-                        </button>
-                        <button id="exportHistoricalBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                            Export Data
-                        </button>
-                    </div>
+                    <h3 class="text-lg font-semibold">Historical Results</h3>
+                    <button id="exportHistoricalBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Export Data
+                    </button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" id="selectAllTests" class="rounded">
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Date
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Script Name
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    TPH
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    VUsers
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    95th RT
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Success Rate
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Script</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">TPH</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">VUsers</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">95th RT</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Success Rate</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="historicalDataBody">
+                        <tbody id="historicalTableBody">
                             <!-- Will be populated dynamically -->
                         </tbody>
                     </table>
@@ -130,80 +92,20 @@ export class HistoricalWorkloadsTab extends BaseTab {
                 <div class="flex items-center justify-between mt-4">
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-700">Rows per page:</span>
-                        <select id="rowsPerPage" class="rounded-md border-gray-300 shadow-sm">
+                        <select id="rowsPerPage" class="form-select rounded-md">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
-                            <option value="100">100</option>
                         </select>
                     </div>
-                    <div class="flex items-center space-x-2" id="paginationControls">
+                    <div id="paginationControls" class="flex space-x-2">
                         <!-- Will be populated dynamically -->
                     </div>
                 </div>
             </div>
-
-            <!-- Custom Date Range Modal -->
-            <div id="dateRangeModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                    <div class="mt-3">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Select Date Range</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Start Date</label>
-                                <input type="date" id="startDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">End Date</label>
-                                <input type="date" id="endDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            </div>
-                            <div class="flex justify-end space-x-3">
-                                <button id="cancelDateRange" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
-                                    Cancel
-                                </button>
-                                <button id="applyDateRange" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                    Apply
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Comparison Analysis Modal -->
-            <div id="comparisonModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-                <div class="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white">
-                    <div class="mt-3">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Comparison Analysis</h3>
-                        <div class="space-y-6">
-                            <!-- Comparison Charts -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <canvas id="comparisonTPHChart"></canvas>
-                                </div>
-                                <div>
-                                    <canvas id="comparisonRTChart"></canvas>
-                                </div>
-                            </div>
-                            <!-- Comparison Table -->
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200" id="comparisonTable">
-                                    <!-- Will be populated dynamically -->
-                                </table>
-                            </div>
-                            <div class="flex justify-end">
-                                <button id="closeComparison" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        return content;
-    }
+        </div>
+    `;
+}
 
         destroyCharts() {
         Object.values(this.charts).forEach(chart => {
