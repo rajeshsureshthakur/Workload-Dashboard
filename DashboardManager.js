@@ -89,6 +89,7 @@ export class DashboardManager {
         // Show selected tab
         const tabContent = document.getElementById(`${tabName}Tab`);
         if (tabContent) {
+            console.log('Showing tab:', tabName);
             tabContent.classList.remove('hidden');
             document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
             this.currentTab = tabName;
@@ -101,6 +102,9 @@ export class DashboardManager {
                 await this.tabs[tabName].load();
             }
         }
+        else {
+        console.warn(`Tab content not found for: ${tabName}`);
+    }
     }
 
    async refreshData() {
