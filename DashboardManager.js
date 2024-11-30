@@ -63,11 +63,14 @@ export class DashboardManager {
     }
 
     async switchTab(tabName) {
-        console.log('Switching to tab:', tabName);
+    console.log('Switching to tab:', tabName);
 
+    try {
         // Hide all tab content
         document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.add('hidden');
+            if(tab.id !== 'homeTab') { // Don't hide home tab when it's selected
+                tab.classList.add('hidden');
+            }
         });
 
         // Remove active class from all nav items
@@ -83,13 +86,16 @@ export class DashboardManager {
             this.currentTab = tabName;
             document.getElementById('currentPageTitle').textContent = this.getTabTitle(tabName);
 
-            if (this.tabs[tabName]) {
-                await this.tabs[tabName].load();
-            } else if (tabName === 'home') {
+            if (tabName === 'home') {
                 await this.loadInitialData();
+            } else if (this.tabs[tabName]) {
+                await this.tabs[tabName].load();
             }
         }
+    } catch (error) {
+        console.error('Error switching tab:', error);
     }
+}
 
     updateDashboard(data) {
         console.log('Updating dashboard with data:', data);
