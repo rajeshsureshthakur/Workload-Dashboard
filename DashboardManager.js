@@ -68,33 +68,36 @@ export class DashboardManager {
     }
 
     async switchTab(tabName) {
-        // Hide all tabs
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('active');
-        });
+    console.log('Switching to tab:', tabName); // Debug log
 
-        // Remove active class from nav items
-        document.querySelectorAll('[data-tab]').forEach(tab => {
-            tab.classList.remove('active');
-        });
+    // Hide all tab content
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+    });
 
-        // Show selected tab
+    // Remove active class from all nav items
+    document.querySelectorAll('[data-tab]').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    // Show selected tab
+    const tabContent = document.getElementById(`${tabName}Tab`);
+    if (tabContent) {
+        tabContent.classList.remove('hidden');
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        this.currentTab = tabName;
+        
+        // Update page title
+        document.getElementById('currentPageTitle').textContent = 
+            this.getTabTitle(tabName);
+
+        // Load tab-specific data
         if (this.tabs[tabName]) {
-            const tabContent = document.getElementById(`${tabName}Tab`);
-            if (tabContent) {
-                tabContent.classList.add('active');
-                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-                this.currentTab = tabName;
-                
-                // Update page title
-                document.getElementById('currentPageTitle').textContent = 
-                    this.getTabTitle(tabName);
-
-                // Load tab-specific data
-                await this.tabs[tabName].load();
-            }
+            await this.tabs[tabName].load();
         }
     }
+    console.log('Tab switch complete'); // Debug log
+}
 
     async refreshData() {
         try {
