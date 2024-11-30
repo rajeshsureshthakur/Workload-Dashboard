@@ -65,10 +65,11 @@ export class DashboardManager {
     async loadInitialData() {
         try {
             const data = await this.dataStore.getCurrentData();
+            console.log('Initial data loaded:', data); // Add this log
             this.updateDashboard(data);
         } catch (error) {
+            console.error('Failed to load initial data:', error);
             this.showError('Failed to load initial data');
-            console.error('Initial data load error:', error);
         }
     }
 
@@ -116,13 +117,13 @@ export class DashboardManager {
 }
 
 
-    updateDashboard(data) {
-    if (!data) {
-        console.warn('No data provided to updateDashboard');
-        return;
-    }
+   updateDashboard(data) {
+        console.log('Updating dashboard with data:', data); // Add this log
+        if (!data) {
+            console.warn('No data provided to updateDashboard');
+            return;
+        }
 
-    try {
         // Update summary metrics
         if (data.summary) {
             this.updateSummaryMetrics(data.summary);
@@ -132,11 +133,7 @@ export class DashboardManager {
         if (this.tabs[this.currentTab]) {
             this.tabs[this.currentTab].update(data);
         }
-    } catch (error) {
-        console.error('Error updating dashboard:', error);
-        throw error;
     }
-}
 
     updateSummaryMetrics(summary) {
         if (!summary) {
