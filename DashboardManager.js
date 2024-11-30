@@ -17,14 +17,16 @@ export class DashboardManager {
 
     async init() {
         try {
+            console.log('Initializing DashboardManager');
             await this.dataStore.initialize();
-            await this.setupTabs();  // Make this async
+            this.setupTabs();
             this.setupEventListeners();
             await this.loadInitialData();
             this.updateLastUpdated();
             
-            // Switch to home tab by default
+            // Explicitly switch to home tab after initialization
             await this.switchTab('home');
+            console.log('Initialization complete');
         } catch (error) {
             console.error('Initialization error:', error);
             this.showError('Failed to initialize dashboard');
@@ -73,24 +75,28 @@ export class DashboardManager {
         }
     }
 
-    async switchTab(tabName) {
+   async switchTab(tabName) {
         console.log('Switching to tab:', tabName);
+
+        // Debug: Log all tab elements
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            console.log('Tab:', tab.id, 'Hidden:', tab.classList.contains('hidden'));
+        });
 
         // Hide all tabs
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.add('hidden');
         });
 
-        // Remove active class from navigation items
-        document.querySelectorAll('[data-tab]').forEach(tab => {
-            tab.classList.remove('active');
-        });
-
         // Show selected tab
         const tabContent = document.getElementById(`${tabName}Tab`);
         if (tabContent) {
-            console.log('Showing tab:', tabName);
+            console.log(`Showing tab: ${tabName}Tab`);
             tabContent.classList.remove('hidden');
+            
+            // Add this to verify content
+            console.log('Tab content HTML:', tabContent.innerHTML);
+            
             document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
             this.currentTab = tabName;
 
@@ -101,11 +107,12 @@ export class DashboardManager {
             if (this.tabs[tabName]) {
                 await this.tabs[tabName].load();
             }
+        } else {
+            console.error(`Tab content element not found: ${tabName}Tab`);
         }
-        else {
-        console.warn(`Tab content not found for: ${tabName}`);
     }
-    }
+
+
 
    async refreshData() {
     try {
@@ -140,12 +147,8 @@ export class DashboardManager {
     }
 
     updateSummaryMetrics(summary) {
-        if (!summary) {
-            console.warn('No summary data provided');
-            return;
-        }
-
-        // Safely update each metric
+        console.log('Updating summary metrics with:', summary);
+        
         const metrics = {
             totalScripts: summary.totalScripts || 0,
             totalTPH: summary.totalTPH || 0,
@@ -156,7 +159,10 @@ export class DashboardManager {
         Object.entries(metrics).forEach(([key, value]) => {
             const element = document.getElementById(key);
             if (element) {
+                console.log(`Updating ${key} with value:`, value);
                 element.textContent = this.formatMetric(key, value);
+            } else {
+                console.warn(`Element not found for metric: ${key}`);
             }
         });
     }
@@ -194,7 +200,7 @@ export class DashboardManager {
         alert(`Success: ${message}`);
     }
 
-    formatMetric(key, value) {
+     formatMetric(key, value) {
         switch (key) {
             case 'successRate':
                 return `${value.toFixed(1)}%`;
