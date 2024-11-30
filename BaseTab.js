@@ -17,12 +17,11 @@ export class BaseTab {
 
     async load() {
         try {
-            console.log(`Loading ${this.tabId} tab`);
-            this.destroyCharts(); // Add this line
-            await this.initializeCharts();
-            await this.loadData();
-            this.setupEventListeners();
+            this.showLoading();
+            // ... existing load logic ...
+            this.hideLoading();
         } catch (error) {
+            this.hideLoading();
             console.error(`Error loading ${this.tabId} tab:`, error);
         }
     }
@@ -86,19 +85,26 @@ export class BaseTab {
     }
 
     showLoading() {
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'loading-overlay';
-        loadingDiv.innerHTML = `
-            <div class="loading-spinner"></div>
-            <p class="mt-2">Loading...</p>
-        `;
-        document.getElementById(this.tabId).appendChild(loadingDiv);
+        const tabContent = document.getElementById(`${this.tabId}Tab`);
+        if (tabContent) {
+            const loader = document.createElement('div');
+            loader.className = 'loading-overlay';
+            loader.innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                </div>
+            `;
+            tabContent.appendChild(loader);
+        }
     }
 
-    hideLoading() {
-        const loadingOverlay = document.querySelector('.loading-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.remove();
+     hideLoading() {
+        const tabContent = document.getElementById(`${this.tabId}Tab`);
+        if (tabContent) {
+            const loader = tabContent.querySelector('.loading-overlay');
+            if (loader) {
+                loader.remove();
+            }
         }
     }
 }
