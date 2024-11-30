@@ -1,10 +1,14 @@
 import { DashboardManager } from './dashboard/DashboardManager.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+const debugPanel = document.getElementById('debugPanel');
+
+document.addEventListener('DOMContentLoaded', async () => {
     try {
+        debugPanel.textContent = 'Initializing Dashboard...';
         window.dashboardManager = new DashboardManager();
-        console.log('Dashboard initialized successfully');
+        debugPanel.textContent = 'Dashboard Initialized Successfully';
     } catch (error) {
-        console.error('Error initializing dashboard:', error);
+        console.error('Initialization error:', error);
+        debugPanel.textContent = `Error: ${error.message}`;
     }
 });
