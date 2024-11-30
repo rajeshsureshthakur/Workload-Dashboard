@@ -93,3 +93,23 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.tab-content {
+    min-height: 200px; /* Ensure minimum height */
+}
+
+.tab-content:not(.hidden) {
+    display: block !important; /* Force display when not hidden */
+}
+
+/* Add visible borders for debugging */
+.tab-content {
+    border: 1px solid #e5e7eb;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+/* Make sure Tailwind's hidden class works */
+.hidden {
+    display: none !important;
+}
