@@ -15,9 +15,10 @@ export class BaseTab {
         throw new Error('createTabContent must be implemented by child class');
     }
 
-     async load() {
+    async load() {
         try {
             console.log(`Loading ${this.tabId} tab`);
+            this.destroyCharts(); // Add this line
             await this.initializeCharts();
             await this.loadData();
             this.setupEventListeners();
@@ -27,12 +28,24 @@ export class BaseTab {
     }
 
     update(data) {
-        // To be implemented by child classes
-        throw new Error('update must be implemented by child class');
+        try {
+            this.updateContent(data);
+        } catch (error) {
+            console.error(`Error updating ${this.tabId} tab:`, error);
+        }
     }
 
     destroy() {
         // Cleanup resources
+        Object.values(this.charts).forEach(chart => {
+            if (chart && typeof chart.destroy === 'function') {
+                chart.destroy();
+            }
+        });
+        this.charts = {};
+    }
+
+    destroyCharts() {
         Object.values(this.charts).forEach(chart => {
             if (chart && typeof chart.destroy === 'function') {
                 chart.destroy();
