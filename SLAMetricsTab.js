@@ -7,56 +7,49 @@ export class SLAMetricsTab extends BaseTab {
     }
 
     createTabContent() {
-        const content = document.createElement('div');
-        content.id = 'slaTab';
-        content.className = 'tab-content hidden';
-        
-        content.innerHTML = `
+    return `
+        <div class="space-y-6">
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-gray-500 text-sm font-medium">Overall Compliance</h3>
+                <div class="tab-section">
+                    <h3 class="text-gray-500 text-sm">Overall Compliance</h3>
                     <p class="text-3xl font-bold mt-2" id="overallCompliance">-</p>
                     <p class="text-sm text-gray-600 mt-1">Across all transactions</p>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-gray-500 text-sm font-medium">Critical Transactions</h3>
+                <div class="tab-section">
+                    <h3 class="text-gray-500 text-sm">Critical Transactions</h3>
                     <p class="text-3xl font-bold mt-2" id="criticalTransactions">-</p>
-                    <p class="text-sm text-gray-600 mt-1">Requiring immediate attention</p>
+                    <p class="text-sm text-gray-600 mt-1">Requiring attention</p>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-gray-500 text-sm font-medium">At Risk</h3>
+                <div class="tab-section">
+                    <h3 class="text-gray-500 text-sm">At Risk</h3>
                     <p class="text-3xl font-bold mt-2" id="atRiskTransactions">-</p>
-                    <p class="text-sm text-gray-600 mt-1">Approaching SLA threshold</p>
+                    <p class="text-sm text-gray-600 mt-1">Near threshold</p>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-gray-500 text-sm font-medium">Healthy</h3>
+                <div class="tab-section">
+                    <h3 class="text-gray-500 text-sm">Healthy</h3>
                     <p class="text-3xl font-bold mt-2" id="healthyTransactions">-</p>
-                    <p class="text-sm text-gray-600 mt-1">Within SLA limits</p>
+                    <p class="text-sm text-gray-600 mt-1">Within SLA</p>
                 </div>
             </div>
 
-            <!-- SLA Analysis Charts -->
+            <!-- Charts Section -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">SLA Compliance Trends</h3>
                     <canvas id="slaTrendChart"></canvas>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">Response Time Distribution</h3>
                     <canvas id="responseDistributionChart"></canvas>
                 </div>
             </div>
 
             <!-- SLA Configuration Table -->
-            <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <div class="tab-section">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">SLA Configuration</h3>
-                    <div class="flex space-x-2">
+                    <div class="space-x-2">
                         <button id="editSLABtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                             Edit SLAs
                         </button>
@@ -66,74 +59,25 @@ export class SLAMetricsTab extends BaseTab {
                     </div>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Transaction Name
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Script Name
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    SLA Target (s)
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Current 95th RT
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Margin
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaction</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Script</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SLA Target</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current 95th RT</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="slaTableBody">
+                        <tbody id="slaTableBody">
                             <!-- Will be populated dynamically -->
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            <!-- Breach Analysis Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-4">Historical SLA Breaches</h3>
-                    <canvas id="breachHistoryChart"></canvas>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-4">Risk Analysis</h3>
-                    <div id="riskAnalysis" class="space-y-4">
-                        <!-- Will be populated dynamically -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Edit SLA Modal -->
-            <div id="slaEditModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-                <div class="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white">
-                    <div class="mt-3">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Edit SLA Configuration</h3>
-                        <div id="slaEditForm">
-                            <!-- Will be populated dynamically -->
-                        </div>
-                        <div class="mt-4 flex justify-end space-x-3">
-                            <button id="cancelSLAEditBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
-                                Cancel
-                            </button>
-                            <button id="saveSLABtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                Save Changes
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        return content;
-    }
+        </div>
+    `;
+}
 
     // Continuing SLAMetricsTab class...
 
