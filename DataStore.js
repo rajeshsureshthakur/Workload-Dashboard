@@ -6,6 +6,7 @@ export class DataStore {
         this.historicalData = [];
         this.configData = null;
         this.storageKey = 'loadrunner_analysis_';
+        this.debug = true; 
     }
 
     async initialize() {
@@ -96,6 +97,9 @@ async getPlannedWorkload() {
     
     async getCurrentData() {
         // Return structured dummy data that matches what the tabs expect
+          if (this.debug) {
+            console.log('getCurrentData returning:', data);
+        }
         return {
             summary: {
                 totalScripts: 5,
