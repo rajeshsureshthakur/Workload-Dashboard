@@ -39,23 +39,22 @@ export class DashboardManager {
     }
 
     setupEventListeners() {
-        // Tab navigation
-        document.querySelectorAll('[data-tab]').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.switchTab(e.target.dataset.tab);
-            });
+    // Tab navigation
+    document.querySelectorAll('[data-tab]').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tabName = e.target.getAttribute('data-tab');
+            console.log('Tab clicked:', tabName); // Debug log
+            this.switchTab(tabName);
         });
+    });
 
-        // Refresh button
-        document.getElementById('refreshBtn').addEventListener('click', () => this.refreshData());
-
-        // Global error handler for async operations
-        window.addEventListener('unhandledrejection', event => {
-            this.showError('An unexpected error occurred');
-            console.error('Unhandled promise rejection:', event.reason);
-        });
+    // Refresh button
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => this.refreshData());
     }
+}
 
     async loadInitialData() {
         try {
