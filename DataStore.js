@@ -47,41 +47,44 @@ export class DataStore {
         }
     }
 
+    
     async getCurrentData() {
-    // Return dummy data for testing
-    return {
-        summary: {
-            totalScripts: 5,
-            totalTPH: 1500,
-            successRate: 98.5,
-            avgResponseTime: 2.3,
-            totalVUsers: 100,
-            slaCompliance: 95
-        },
-        trends: {
-            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
-            performance: [85, 88, 92, 89, 91],
-            responseTime: [2.1, 2.3, 2.0, 2.2, 2.1],
-            throughput: [1200, 1300, 1450, 1400, 1500]
-        },
-        scripts: [
-            {
-                name: 'Script 1',
-                tph: 500,
-                vusers: 30,
-                responseTime: 2.1,
-                successRate: 99.1
+        // Return structured dummy data that matches what the tabs expect
+        return {
+            summary: {
+                totalScripts: 5,
+                totalTPH: 1500,
+                successRate: 98.5,
+                avgResponseTime: 2.3,
+                totalVUsers: 100,
+                slaCompliance: 95
             },
-            {
-                name: 'Script 2',
-                tph: 1000,
-                vusers: 70,
-                responseTime: 2.4,
-                successRate: 98.2
+            transactions: [  // Add this array
+                {
+                    name: 'Transaction 1',
+                    script: 'Script 1',
+                    tph: 500,
+                    responseTime: 1.8,
+                    successRate: 99.5,
+                    status: 'healthy'
+                },
+                {
+                    name: 'Transaction 2',
+                    script: 'Script 2',
+                    tph: 750,
+                    responseTime: 2.1,
+                    successRate: 98.2,
+                    status: 'warning'
+                }
+            ],
+            trends: {
+                labels: ['1h', '2h', '3h', '4h', '5h'],
+                responseTimeSeries: [1.8, 1.9, 2.1, 1.9, 1.8],
+                throughputSeries: [450, 500, 480, 520, 500]
             }
-        ]
-    };
-}
+        };
+    }
+    
 
     async loadFromLocalStorage() {
         try {
