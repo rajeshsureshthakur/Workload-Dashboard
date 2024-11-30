@@ -60,6 +60,40 @@
         </div>
     </header>
 
+    <div id="homeTab" class="tab-content">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-gray-500 text-sm">Total Scripts</h3>
+            <p class="text-3xl font-bold mt-2" id="totalScripts">-</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-gray-500 text-sm">Overall Success Rate</h3>
+            <p class="text-3xl font-bold mt-2" id="successRate">-</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-gray-500 text-sm">Total TPH</h3>
+            <p class="text-3xl font-bold mt-2" id="totalTPH">-</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-gray-500 text-sm">Average Response Time</h3>
+            <p class="text-3xl font-bold mt-2" id="avgResponseTime">-</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-4">Response Time Trend</h3>
+            <canvas id="responseTrendChart"></canvas>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-4">TPH Trend</h3>
+            <canvas id="tphTrendChart"></canvas>
+        </div>
+    </div>
+</div>
+
     <!-- Main Content -->
     <main id="mainContent" class="flex-1 overflow-y-auto bg-gray-100 p-6">
         <!-- Tab content will be inserted here -->
