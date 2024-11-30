@@ -15,9 +15,15 @@ export class BaseTab {
         throw new Error('createTabContent must be implemented by child class');
     }
 
-    async load() {
-        // To be implemented by child classes
-        throw new Error('load must be implemented by child class');
+     async load() {
+        try {
+            console.log(`Loading ${this.tabId} tab`);
+            await this.initializeCharts();
+            await this.loadData();
+            this.setupEventListeners();
+        } catch (error) {
+            console.error(`Error loading ${this.tabId} tab:`, error);
+        }
     }
 
     update(data) {
@@ -56,6 +62,14 @@ export class BaseTab {
                 ${status.toUpperCase()}
             </span>
         `;
+    }
+
+    showError(message) {
+        this.dashboardManager.showError(message);
+    }
+
+    showSuccess(message) {
+        this.dashboardManager.showSuccess(message);
     }
 
     showLoading() {
