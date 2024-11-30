@@ -73,16 +73,14 @@ export class PlannedWorkloadTab extends BaseTab {
     }
 
 
-    createTabContent() {
-        const content = document.createElement('div');
-        content.id = 'plannedTab';
-        content.className = 'tab-content hidden';
-        
-        content.innerHTML = `
+    // PlannedWorkloadTab.js
+createTabContent() {
+    return `
+        <div class="space-y-6">
             <!-- Summary Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Total Load -->
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">Total Planned Load</h3>
                     <div class="text-center">
                         <p class="text-3xl font-bold" id="totalPlannedTPH">-</p>
@@ -91,13 +89,13 @@ export class PlannedWorkloadTab extends BaseTab {
                 </div>
 
                 <!-- Script Distribution -->
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">Script Distribution</h3>
                     <canvas id="scriptDistributionChart"></canvas>
                 </div>
 
                 <!-- Resource Requirements -->
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">Resource Requirements</h3>
                     <div id="resourceRequirements" class="space-y-4">
                         <!-- Will be populated dynamically -->
@@ -105,8 +103,8 @@ export class PlannedWorkloadTab extends BaseTab {
                 </div>
             </div>
 
-            <!-- Detailed Workload Table -->
-            <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <!-- Workload Details -->
+            <div class="tab-section">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">Planned Workload Details</h3>
                     <div class="flex space-x-2">
@@ -118,77 +116,39 @@ export class PlannedWorkloadTab extends BaseTab {
                         </button>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Script Name
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Planned TPH
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Required VUsers
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Pacing (seconds)
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Think Time
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="workloadTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Will be populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Script Name</th>
+                            <th>Planned TPH</th>
+                            <th>Required VUsers</th>
+                            <th>Pacing (s)</th>
+                            <th>Think Time (s)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workloadTableBody">
+                        <!-- Will be populated dynamically -->
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Configuration Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Pacing Strategy -->
-                <div class="bg-white rounded-lg shadow p-6">
+            <!-- Pacing Strategy -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">Pacing Strategy</h3>
                     <div id="pacingStrategy" class="space-y-4">
                         <!-- Will be populated dynamically -->
                     </div>
                 </div>
-
-                <!-- VUser Distribution -->
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="tab-section">
                     <h3 class="text-lg font-semibold mb-4">VUser Distribution</h3>
                     <canvas id="vuserDistributionChart"></canvas>
                 </div>
             </div>
-
-            <!-- Edit Workload Modal -->
-            <div id="editWorkloadModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-                <div class="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white">
-                    <div class="mt-3">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Workload Configuration</h3>
-                        <div id="editWorkloadForm">
-                            <!-- Will be populated dynamically -->
-                        </div>
-                        <div class="mt-4 flex justify-end space-x-3">
-                            <button id="cancelEditBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
-                                Cancel
-                            </button>
-                            <button id="saveWorkloadBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                Save Changes
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        return content;
-    }
+        </div>
+    `;
+}
     
 
     setupEventListeners() {
