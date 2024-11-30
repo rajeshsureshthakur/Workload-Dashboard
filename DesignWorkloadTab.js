@@ -139,17 +139,21 @@ createTabContent() {
         }
     }
 
-    setupEventListeners() {
-        // File upload listeners
-        document.getElementById('historicalFile').addEventListener('change', (e) => this.handleFileUpload(e, 'historical'));
-        document.getElementById('configFile').addEventListener('change', (e) => this.handleFileUpload(e, 'config'));
-        document.getElementById('tphFile').addEventListener('change', (e) => this.handleFileUpload(e, 'tph'));
+   setupEventListeners() {
+        // Wait for next tick to ensure elements exist
+        setTimeout(() => {
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            if (analyzeBtn) {
+                analyzeBtn.addEventListener('click', () => this.analyzeWorkload());
+            }
 
-        // Analysis button listener
-        document.getElementById('analyzeBtn').addEventListener('click', () => this.analyzeWorkload());
-
-        // Export button listener
-        document.getElementById('exportAnalysisBtn')?.addEventListener('click', () => this.exportAnalysis());
+            ['historical', 'config', 'tph'].forEach(type => {
+                const fileInput = document.getElementById(`${type}File`);
+                if (fileInput) {
+                    fileInput.addEventListener('change', (e) => this.handleFileUpload(e, type));
+                }
+            });
+        }, 0);
     }
 
     initializeCharts() {
