@@ -11,6 +11,20 @@ export class DesignWorkloadTab extends BaseTab {
         this.analysisResults = null;
     }
 
+    update(data) {
+        console.log('Updating Design Workload tab with data:', data);
+        this.updateContent(data);
+    }
+
+     updateContent(data) {
+        if (!data) return;
+        
+        // Update any dynamic content in the design tab
+        if (this.analysisResults) {
+            this.showAnalysisResults(this.analysisResults);
+        }
+    }
+
     createTabContent() {
         const content = document.createElement('div');
         content.id = 'designTab';
@@ -125,13 +139,27 @@ export class DesignWorkloadTab extends BaseTab {
         return content;
     }
 
-    async load() {
-        this.setupEventListeners();
-        this.initializeCharts();
-        
-        // If there are previous analysis results, show them
-        if (this.analysisResults) {
-            this.showAnalysisResults(this.analysisResults);
+     async load() {
+        try {
+            console.log('Loading Design Workload tab');
+            const content = this.createTabContent();
+            const mainContent = document.getElementById('mainContent');
+            
+            // Check if tab content already exists
+            const existingTab = document.getElementById('designTab');
+            if (!existingTab) {
+                mainContent.appendChild(content);
+            }
+            
+            this.setupEventListeners();
+            
+            // Show existing analysis if available
+            if (this.analysisResults) {
+                this.showAnalysisResults(this.analysisResults);
+            }
+        } catch (error) {
+            console.error('Error loading design workload:', error);
+            this.dashboardManager.showError('Failed to load design workload');
         }
     }
 
