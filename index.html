@@ -11,8 +11,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
+    <style>
+        .tab-content {
+            display: block !important;
+            visibility: visible !important;
+            min-height: 300px;
+            background-color: white;
+            padding: 1rem;
+            margin: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .tab-content.hidden {
+            display: none !important;
+        }
+
+        #mainContent {
+            height: 100%;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: #f3f4f6;
+        }
+
+        .summary-card {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Debug outline */
+        .debug-outline {
+            outline: 2px solid red;
+        }
+
+        /* Force chart containers to have height */
+        canvas {
+            min-height: 300px !important;
+        }
+    </style>
+
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- <link rel="stylesheet" href="css/styles.css"> -->
 </head>
 <body class="bg-gray-100">
     <!-- Main Container -->
