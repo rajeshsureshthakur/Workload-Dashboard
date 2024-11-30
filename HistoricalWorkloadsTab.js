@@ -10,6 +10,7 @@ export class HistoricalWorkloadsTab extends BaseTab {
             pageSize: 10,
             currentPage: 1
         };
+        this.charts = {};
     }
 
     createTabContent() {
@@ -204,21 +205,33 @@ export class HistoricalWorkloadsTab extends BaseTab {
         return content;
     }
 
-    // Continuing HistoricalWorkloadsTab class...
+        destroyCharts() {
+        Object.values(this.charts).forEach(chart => {
+            if (chart && typeof chart.destroy === 'function') {
+                chart.destroy();
+            }
+        });
+        this.charts = {};
+    }
+
 
     async load() {
-    try {
-        console.log('Loading Historical Workloads tab');
-        await this.loadScriptOptions();
-        const historicalData = await this.dashboardManager.dataStore.getHistoricalData(this.currentFilters);
-        this.setupEventListeners();
-        this.initializeCharts();
-        this.updateContent(historicalData);
-    } catch (error) {
-        console.error('Error loading historical data:', error);
-        this.dashboardManager.showError('Failed to load historical data');
+        try {
+            console.log('Loading Historical Workloads tab');
+            await this.loadScriptOptions();
+            const historicalData = await this.dashboardManager.dataStore.getHistoricalData(this.currentFilters);
+            
+            // Destroy existing charts before creating new ones
+            this.destroyCharts();
+            this.initializeCharts();
+            
+            this.setupEventListeners();
+            this.updateContent(historicalData);
+        } catch (error) {
+            console.error('Error loading historical data:', error);
+            this.dashboardManager.showError('Failed to load historical data');
+        }
     }
-}
 
     async loadScriptOptions() {
     try {
@@ -258,21 +271,18 @@ export class HistoricalWorkloadsTab extends BaseTab {
 
     initializeCharts() {
         // TPH Trend Chart
-        this.charts.tphTrend = new Chart(
-            document.getElementById('tphTrendHistoryChart').getContext('2d'),
-            this.getTPHTrendConfig()
-        );
+        const tphCtx = document.getElementById('tphTrendHistoryChart')?.getContext('2d');
+        if (tphCtx) {
+            this.charts.tphTrend = new Chart(tphCtx, this.getTPHTrendConfig());
+        }
 
         // Response Time Trend Chart
-        this.charts.rtTrend = new Chart(
-            document.getElementById('rtTrendHistoryChart').getContext('2d'),
-            this.getRTTrendConfig()
-        );
-
-        // Initialize comparison charts
-        this.initializeComparisonCharts();
+        const rtCtx = document.getElementById('rtTrendHistoryChart')?.getContext('2d');
+        if (rtCtx) {
+            this.charts.rtTrend = new Chart(rtCtx, this.getRTTrendConfig());
+        }
     }
-
+    
     initializeComparisonCharts() {
         // TPH Comparison Chart
         this.charts.comparisonTPH = new Chart(
@@ -288,10 +298,28 @@ export class HistoricalWorkloadsTab extends BaseTab {
     }
 
     updateContent(data) {
-    if (!data) {
-        console.warn('No historical data provided');
-        return;
+        if (!data) {
+            console.warn('No historical data provided');
+            return;
+        }
+
+        try {
+            if (data.trends) {
+                this.updateTrendCharts(data.trends);
+            }
+            
+            if (Array.isArray(data.results)) {
+                this.updateHistoricalTable(data.results);
+            }
+            
+            if (data.pagination) {
+                this.updatePagination(data.pagination);
+            }
+        } catch (error) {
+            console.error('Error updating historical content:', error);
+        }
     }
+
 
     try {
         if (data.trends) {
@@ -310,28 +338,40 @@ export class HistoricalWorkloadsTab extends BaseTab {
     }
 }
 
-    updateTrendCharts(trends) {
-        // Update TPH Trend Chart
-        this.charts.tphTrend.data.labels = trends.dates;
-        this.charts.tphTrend.data.datasets = trends.tphData.map(series => ({
-            label: series.script,
-            data: series.values,
-            borderColor: this.getScriptColor(series.script),
-            tension: 0.1
-        }));
-        this.charts.tphTrend.update();
+    updateTrendCharts(trends = {}) {
+        try {
+            // Update TPH Trend Chart
+            if (this.charts.tphTrend && trends.tphData) {
+                const tphDatasets = Array.isArray(trends.tphData) ? trends.tphData.map(series => ({
+                    label: series.script,
+                    data: series.values || [],
+                    borderColor: this.getScriptColor(series.script),
+                    tension: 0.1
+                })) : [];
 
-        // Update Response Time Trend Chart
-        this.charts.rtTrend.data.labels = trends.dates;
-        this.charts.rtTrend.data.datasets = trends.rtData.map(series => ({
-            label: series.script,
-            data: series.values,
-            borderColor: this.getScriptColor(series.script),
-            tension: 0.1
-        }));
-        this.charts.rtTrend.update();
+                this.charts.tphTrend.data.labels = trends.dates || [];
+                this.charts.tphTrend.data.datasets = tphDatasets;
+                this.charts.tphTrend.update();
+            }
+
+            // Update Response Time Trend Chart
+            if (this.charts.rtTrend && trends.rtData) {
+                const rtDatasets = Array.isArray(trends.rtData) ? trends.rtData.map(series => ({
+                    label: series.script,
+                    data: series.values || [],
+                    borderColor: this.getScriptColor(series.script),
+                    tension: 0.1
+                })) : [];
+
+                this.charts.rtTrend.data.labels = trends.dates || [];
+                this.charts.rtTrend.data.datasets = rtDatasets;
+                this.charts.rtTrend.update();
+            }
+        } catch (error) {
+            console.error('Error updating trend charts:', error);
+        }
     }
-
+    
     updateHistoricalTable(results) {
         const tbody = document.getElementById('historicalDataBody');
         tbody.innerHTML = '';
@@ -544,7 +584,7 @@ export class HistoricalWorkloadsTab extends BaseTab {
     }
 
     // Chart Configurations
-    getTPHTrendConfig() {
+   getTPHTrendConfig() {
         return {
             type: 'line',
             data: {
@@ -621,8 +661,8 @@ export class HistoricalWorkloadsTab extends BaseTab {
         ];
 
         // Generate consistent color based on script name
-        const index = this.hashString(scriptName) % colors.length;
-        return colors[index];
+        const hash = this.hashString(scriptName);
+        return colors[hash % colors.length];
     }
 
     hashString(str) {
