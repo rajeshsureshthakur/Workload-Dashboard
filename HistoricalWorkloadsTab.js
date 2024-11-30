@@ -207,26 +207,32 @@ export class HistoricalWorkloadsTab extends BaseTab {
     // Continuing HistoricalWorkloadsTab class...
 
     async load() {
-        try {
-            await this.loadScriptOptions();
-            const historicalData = await this.dashboardManager.dataStore.getHistoricalData(this.currentFilters);
-            this.setupEventListeners();
-            this.initializeCharts();
-            this.updateContent(historicalData);
-        } catch (error) {
-            console.error('Error loading historical data:', error);
-            this.dashboardManager.showError('Failed to load historical data');
-        }
+    try {
+        console.log('Loading Historical Workloads tab');
+        await this.loadScriptOptions();
+        const historicalData = await this.dashboardManager.dataStore.getHistoricalData(this.currentFilters);
+        this.setupEventListeners();
+        this.initializeCharts();
+        this.updateContent(historicalData);
+    } catch (error) {
+        console.error('Error loading historical data:', error);
+        this.dashboardManager.showError('Failed to load historical data');
     }
+}
 
     async loadScriptOptions() {
+    try {
         const scripts = await this.dashboardManager.dataStore.getAvailableScripts();
         const select = document.getElementById('scriptFilter');
-        select.innerHTML = scripts.map(script => 
-            `<option value="${script.id}">${script.name}</option>`
-        ).join('');
+        if (select) {
+            select.innerHTML = scripts.map(script => 
+                `<option value="${script.id}">${script.name}</option>`
+            ).join('');
+        }
+    } catch (error) {
+        console.error('Error loading script options:', error);
     }
-
+}
     setupEventListeners() {
         // Filter event listeners
         document.getElementById('dateRangeFilter').addEventListener('change', (e) => this.handleDateRangeChange(e));
@@ -282,10 +288,27 @@ export class HistoricalWorkloadsTab extends BaseTab {
     }
 
     updateContent(data) {
-        this.updateTrendCharts(data.trends);
-        this.updateHistoricalTable(data.results);
-        this.updatePagination(data.pagination);
+    if (!data) {
+        console.warn('No historical data provided');
+        return;
     }
+
+    try {
+        if (data.trends) {
+            this.updateTrendCharts(data.trends);
+        }
+        
+        if (Array.isArray(data.results)) {
+            this.updateHistoricalTable(data.results);
+        }
+        
+        if (data.pagination) {
+            this.updatePagination(data.pagination);
+        }
+    } catch (error) {
+        console.error('Error updating historical content:', error);
+    }
+}
 
     updateTrendCharts(trends) {
         // Update TPH Trend Chart
