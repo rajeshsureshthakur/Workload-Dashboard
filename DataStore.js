@@ -47,6 +47,52 @@ export class DataStore {
         }
     }
 
+     async getPlannedWorkload() {
+        // Return dummy planned workload data
+        return {
+            summary: {
+                totalTPH: 1500,
+                totalVUsers: 100
+            },
+            scripts: [
+                {
+                    name: 'Script 1',
+                    plannedTPH: 500,
+                    requiredVUsers: 30,
+                    pacing: 2.5,
+                    thinkTime: 1.0,
+                    status: 'optimal'
+                },
+                {
+                    name: 'Script 2',
+                    plannedTPH: 1000,
+                    requiredVUsers: 70,
+                    pacing: 3.0,
+                    thinkTime: 1.5,
+                    status: 'warning'
+                }
+            ],
+            pacing: {
+                strategyType: 'fixed',
+                distribution: [
+                    { percentage: 60 },
+                    { percentage: 40 }
+                ],
+                description: 'Fixed pacing strategy with think time',
+                recommendations: [
+                    'Consider dynamic pacing for better resource utilization',
+                    'Monitor response times during peak load'
+                ]
+            },
+            resources: {
+                totalVUsers: 100,
+                estimatedMemory: 16,
+                estimatedCPU: 8,
+                estimatedBandwidth: 100,
+                warningLevel: 'medium'
+            }
+        };
+    }
     
     async getCurrentData() {
         // Return structured dummy data that matches what the tabs expect
@@ -82,6 +128,7 @@ export class DataStore {
                 responseTimeSeries: [1.8, 1.9, 2.1, 1.9, 1.8],
                 throughputSeries: [450, 500, 480, 520, 500]
             }
+             planned: await this.getPlannedWorkload()
         };
     }
     
