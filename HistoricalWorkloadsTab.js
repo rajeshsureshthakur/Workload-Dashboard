@@ -321,23 +321,7 @@ export class HistoricalWorkloadsTab extends BaseTab {
     }
 
 
-    try {
-        if (data.trends) {
-            this.updateTrendCharts(data.trends);
-        }
-        
-        if (Array.isArray(data.results)) {
-            this.updateHistoricalTable(data.results);
-        }
-        
-        if (data.pagination) {
-            this.updatePagination(data.pagination);
-        }
-    } catch (error) {
-        console.error('Error updating historical content:', error);
-    }
-}
-
+    
     updateTrendCharts(trends = {}) {
         try {
             // Update TPH Trend Chart
