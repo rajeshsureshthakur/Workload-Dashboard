@@ -114,17 +114,45 @@ export class CurrentWorkloadTab extends BaseTab {
     }
 
     updateContent(data) {
-        this.updateSummaryCards(data.summary);
-        this.updateCharts(data.trends);
-        this.updateTransactionTable(data.transactions);
-        this.updateAlerts(data.alerts);
+        if (!data) {
+            console.warn('No data provided to updateContent');
+            return;
+        }
+
+        try {
+            if (data.summary) {
+                this.updateSummaryCards(data.summary);
+            }
+            
+            if (data.trends) {
+                this.updateCharts(data.trends);
+            }
+            
+            if (Array.isArray(data.transactions)) {
+                this.updateTransactionTable(data.transactions);
+            } else {
+                console.warn('No transactions array in data');
+                this.updateTransactionTable([]); // Pass empty array as fallback
+            }
+        } catch (error) {
+            console.error('Error updating content:', error);
+        }
     }
 
-    updateSummaryCards(summary) {
-        document.getElementById('currentTPH').textContent = this.formatNumber(summary.currentTPH);
-        document.getElementById('activeVUsers').textContent = summary.activeVUsers;
-        document.getElementById('currentSuccessRate').textContent = `${summary.successRate}%`;
-        document.getElementById('avgResponseTime').textContent = `${summary.avgResponseTime}s`;
+     updateSummaryCards(summary) {
+        const elements = {
+            currentTPH: summary.totalTPH,
+            activeVUsers: summary.totalVUsers,
+            currentSuccessRate: summary.successRate,
+            avgResponseTime: summary.avgResponseTime
+        };
+
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = this.formatValue(id, value);
+            }
+        });
     }
 
     updateCharts(trends) {
@@ -145,24 +173,38 @@ export class CurrentWorkloadTab extends BaseTab {
 
     updateTransactionTable(transactions) {
         const tbody = document.getElementById('transactionTableBody');
+        if (!tbody) {
+            console.warn('Transaction table body element not found');
+            return;
+        }
+
         tbody.innerHTML = '';
 
+        if (!Array.isArray(transactions)) {
+            console.warn('Invalid transactions data:', transactions);
+            return;
+        }
+
         transactions.forEach(transaction => {
-            const row = this.createTransactionRow(transaction);
-            tbody.appendChild(row);
+            try {
+                const row = this.createTransactionRow(transaction);
+                tbody.appendChild(row);
+            } catch (error) {
+                console.error('Error creating transaction row:', error);
+            }
         });
     }
 
     createTransactionRow(transaction) {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">${transaction.name}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${transaction.script}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${this.formatNumber(transaction.tph)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${transaction.responseTime}s</td>
-            <td class="px-6 py-4 whitespace-nowrap">${transaction.successRate}%</td>
+            <td class="px-6 py-4 whitespace-nowrap">${transaction.name || 'N/A'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${transaction.script || 'N/A'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${this.formatNumber(transaction.tph) || '0'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${transaction.responseTime?.toFixed(2) || '0.00'}s</td>
+            <td class="px-6 py-4 whitespace-nowrap">${transaction.successRate?.toFixed(1) || '0.0'}%</td>
             <td class="px-6 py-4 whitespace-nowrap">
-                ${this.getStatusBadge(transaction.status)}
+                ${this.getStatusBadge(transaction.status || 'unknown')}
             </td>
         `;
         return row;
@@ -260,24 +302,38 @@ export class CurrentWorkloadTab extends BaseTab {
         return new Intl.NumberFormat().format(number);
     }
 
+    formatValue(id, value) {
+        switch (id) {
+            case 'currentSuccessRate':
+                return `${value.toFixed(1)}%`;
+            case 'avgResponseTime':
+                return `${value.toFixed(2)}s`;
+            case 'currentTPH':
+                return this.formatNumber(value);
+            default:
+                return value.toString();
+        }
+    }
+
+
     formatTimestamp(timestamp) {
         return new Date(timestamp).toLocaleString();
     }
 
     getStatusBadge(status) {
         const classes = {
-            success: 'bg-green-100 text-green-800',
+            healthy: 'bg-green-100 text-green-800',
             warning: 'bg-yellow-100 text-yellow-800',
-            error: 'bg-red-100 text-red-800'
+            error: 'bg-red-100 text-red-800',
+            unknown: 'bg-gray-100 text-gray-800'
         };
 
         return `
-            <span class="px-2 py-1 text-xs font-semibold rounded-full ${classes[status]}">
+            <span class="px-2 py-1 text-xs font-semibold rounded-full ${classes[status] || classes.unknown}">
                 ${status.toUpperCase()}
             </span>
         `;
     }
-
     getAlertClass(severity) {
         const classes = {
             high: 'bg-red-50 text-red-800',
