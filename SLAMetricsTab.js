@@ -103,25 +103,66 @@ export class SLAMetricsTab extends BaseTab {
         document.getElementById('saveSLABtn').addEventListener('click', () => this.saveSLAChanges());
     }
 
-    initializeCharts() {
+   async initializeCharts() {
+    try {
+        // Wait for next tick to ensure DOM elements exist
+        await new Promise(resolve => setTimeout(resolve, 0));
+
         // SLA Trend Chart
-        this.charts.slaTrend = new Chart(
-            document.getElementById('slaTrendChart').getContext('2d'),
-            this.getSLATrendConfig()
-        );
+        const slaTrendCtx = document.getElementById('slaTrendChart');
+        if (slaTrendCtx) {
+            this.charts.slaTrend = new Chart(slaTrendCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'SLA Compliance %',
+                        data: [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
 
         // Response Distribution Chart
-        this.charts.responseDist = new Chart(
-            document.getElementById('responseDistributionChart').getContext('2d'),
-            this.getResponseDistConfig()
-        );
-
-        // Breach History Chart
-        this.charts.breachHistory = new Chart(
-            document.getElementById('breachHistoryChart').getContext('2d'),
-            this.getBreachHistoryConfig()
-        );
+        const responseDistCtx = document.getElementById('responseDistributionChart');
+        if (responseDistCtx) {
+            this.charts.responseDist = new Chart(responseDistCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Response Time Distribution',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error initializing charts:', error);
     }
+}
 
      updateContent(data) {
         if (!data) {
