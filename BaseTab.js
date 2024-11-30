@@ -10,62 +10,58 @@ export class BaseTab {
         document.getElementById('mainContent').appendChild(content);
     }
 
-    createTabContent() {
-        // To be implemented by child classes
+     async initializeComponents() {
+        try {
+            await this.setupEventListeners();
+            await this.initializeCharts();
+        } catch (error) {
+            console.error(`Error initializing components for ${this.tabId}:`, error);
+        }
+    }
+
+    
+
+   createTabContent() {
         throw new Error('createTabContent must be implemented by child class');
     }
 
-    async load() {
+   async load() {
         try {
             console.log(`Loading ${this.tabId} tab`);
-            this.showLoading();
             
-            // Create or get tab container
+            // Get or create the tab container
             let tabContainer = document.getElementById(`${this.tabId}Tab`);
             if (!tabContainer) {
                 console.log(`Creating container for ${this.tabId}`);
+                const mainContent = document.getElementById('mainContent');
+                if (!mainContent) {
+                    throw new Error('Main content container not found');
+                }
+
                 tabContainer = document.createElement('div');
                 tabContainer.id = `${this.tabId}Tab`;
-                tabContainer.className = 'tab-content';
-                document.getElementById('mainContent').appendChild(tabContainer);
-            }
-
-            // Create initial content if empty
-            if (!tabContainer.innerHTML.trim()) {
+                tabContainer.className = 'tab-content hidden';
                 tabContainer.innerHTML = this.createTabContent();
+                mainContent.appendChild(tabContainer);
             }
 
+            // Initialize components
+            await this.initializeComponents();
+            
+            // Load and update data
             const data = await this.dashboardManager.dataStore.getCurrentData();
             this.updateContent(data);
-            this.initializeCharts();
-            this.setupEventListeners();
-            this.hideLoading();
+
         } catch (error) {
-            this.hideLoading();
             console.error(`Error loading ${this.tabId} tab:`, error);
+            throw error;
         }
     }
 
 
     updateContent(data) {
-        const tabContent = document.getElementById(`${this.tabId}Tab`);
-        if (!tabContent) {
-            console.error(`Tab content container not found for ${this.tabId}`);
-            return;
-        }
-
-        // Force some visible content
-        tabContent.innerHTML = `
-            <div class="bg-white p-4 rounded-lg shadow">
-                <h2 class="text-xl font-bold mb-4">${this.tabId.charAt(0).toUpperCase() + this.tabId.slice(1)} Content</h2>
-                <pre class="bg-gray-100 p-4 rounded">
-                    ${JSON.stringify(data, null, 2)}
-                </pre>
-            </div>
-        `;
-
-        // Add debug outline
-        tabContent.classList.add('debug-outline');
+        // To be implemented by child classes
+        console.log(`Updating content for ${this.tabId} with data:`, data);
     }
 
 
@@ -85,6 +81,14 @@ export class BaseTab {
             }
         });
         this.charts = {};
+    }
+
+     setupEventListeners() {
+        // To be implemented by child classes if needed
+    }
+
+    initializeCharts() {
+        // To be implemented by child classes if needed
     }
 
     destroyCharts() {
