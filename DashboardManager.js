@@ -1,3 +1,11 @@
+import { DataStore } from '../data/DataStore.js';
+import { ChartManager } from './ChartManager.js';
+import { CurrentWorkloadTab } from '../tabs/CurrentWorkloadTab.js';
+import { DesignWorkloadTab } from '../tabs/DesignWorkloadTab.js';
+import { PlannedWorkloadTab } from '../tabs/PlannedWorkloadTab.js';
+import { SLAMetricsTab } from '../tabs/SLAMetricsTab.js';
+import { HistoricalWorkloadsTab } from '../tabs/HistoricalWorkloadsTab.js';
+
 export class DashboardManager {
     constructor() {
         this.dataStore = new DataStore();
