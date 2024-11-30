@@ -102,39 +102,41 @@ export class DashboardManager {
         }
     }
 
-    async refreshData() {
-        try {
-            const data = await this.dataStore.getCurrentData();
-            this.updateDashboard(data);
-            this.updateLastUpdated();
-            this.showSuccess('Data refreshed successfully');
-        } catch (error) {
-            this.showError('Failed to refresh data');
-            console.error('Refresh error:', error);
-        }
+   async refreshData() {
+    try {
+        console.log('Refreshing data...');
+        const data = await this.dataStore.getCurrentData();
+        this.updateDashboard(data);
+        this.updateLastUpdated();
+        console.log('Data refreshed successfully');
+    } catch (error) {
+        console.error('Refresh error:', error);
+        this.showError('Failed to refresh data');
     }
+}
+
 
     updateDashboard(data) {
-        if (!data) {
-            console.warn('No data provided to updateDashboard');
-            return;
-        }
+    if (!data) {
+        console.warn('No data provided to updateDashboard');
+        return;
+    }
 
+    try {
         // Update summary metrics
         if (data.summary) {
             this.updateSummaryMetrics(data.summary);
-        }
-
-        // Update charts
-        if (data.trends) {
-            this.chartManager.updateCharts(data);
         }
 
         // Update current tab
         if (this.tabs[this.currentTab]) {
             this.tabs[this.currentTab].update(data);
         }
+    } catch (error) {
+        console.error('Error updating dashboard:', error);
+        throw error;
     }
+}
 
     updateSummaryMetrics(summary) {
         if (!summary) {
