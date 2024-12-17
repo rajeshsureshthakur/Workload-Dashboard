@@ -1,0 +1,83 @@
+import java.io.*;
+import java.util.*;
+
+public class CSVMerger {
+    public static void main(String[] args) {
+        // Directory containing CSV files
+        String inputDirectory = "path/to/your/input/directory";
+        String outputFile = "path/to/your/output/merged.csv";
+        
+        try {
+            // Map to store data: Server -> (Metric -> Value)
+            Map<String, Map<String, String>> mergedData = new HashMap<>();
+            // Set to store all unique metric names
+            Set<String> allMetrics = new HashSet<>();
+            
+            // Get all CSV files starting with APPD_CAS
+            File dir = new File(inputDirectory);
+            File[] files = dir.listFiles((d, name) -> name.toLowerCase().startsWith("appd_cas") && name.toLowerCase().endsWith(".csv"));
+            
+            if (files == null || files.length == 0) {
+                System.out.println("No matching CSV files found!");
+                return;
+            }
+
+            // Process each file
+            for (File file : files) {
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    boolean isFirstLine = true;
+                    
+                    while ((line = br.readLine()) != null) {
+                        if (isFirstLine) {
+                            isFirstLine = false;
+                            continue; // Skip header row
+                        }
+                        
+                        // Split CSV line (handling possible commas within quotes)
+                        String[] parts = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+                        if (parts.length >= 3) {
+                            String server = parts[0].trim();
+                            String metric = parts[1].trim();
+                            String value = parts[2].trim();
+                            
+                            // Add metric to set of all metrics
+                            allMetrics.add(metric);
+                            
+                            // Add data to map
+                            mergedData.computeIfAbsent(server, k -> new HashMap<>())
+                                     .put(metric, value);
+                        }
+                    }
+                }
+            }
+            
+            // Write merged data to output file
+            try (PrintWriter pw = new PrintWriter(new FileWriter(outputFile))) {
+                // Write header
+                pw.print("Server");
+                for (String metric : allMetrics) {
+                    pw.print("," + metric);
+                }
+                pw.println();
+                
+                // Write data for each server
+                for (String server : mergedData.keySet()) {
+                    pw.print(server);
+                    Map<String, String> serverMetrics = mergedData.get(server);
+                    
+                    for (String metric : allMetrics) {
+                        pw.print("," + serverMetrics.getOrDefault(metric, ""));
+                    }
+                    pw.println();
+                }
+                
+                System.out.println("Merged CSV file created successfully!");
+            }
+            
+        } catch (IOException e) {
+            System.err.println("Error processing files: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
